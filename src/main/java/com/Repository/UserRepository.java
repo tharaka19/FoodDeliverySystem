@@ -23,4 +23,5 @@ public class UserRepository implements UserDao{
 	public void update(User user) {
 		hibernateTemplate.update(user);
 	}
+	
 }

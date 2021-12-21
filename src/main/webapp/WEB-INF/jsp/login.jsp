@@ -58,7 +58,7 @@
 	</script>
 </head>
 
-<body class="authentication-bg">
+<body class="authentication-bg" background="<spring:url value="/resources/siteImage/pasta15_b291.jpg"/>">
 	<div class="account-pages my-5 pt-sm-5">
 		<div class="container">
 			<div class="row">
@@ -81,7 +81,7 @@
 								<form class="custom-validation" action="loginCustomer" method="get">
 									
 									<div class="mb-3">
-										<label class="form-label">Username</label>
+										<label class="form-label">Email</label>
 										<div>
 											<input type="email" class="form-control" required parsley-type="email" placeholder="Email" name="email" id="email"/>
 										</div>
@@ -90,15 +90,17 @@
 									<div class="mb-3">
 										<label class="form-label">Password</label>
 										<div>
-											<input type="password" id="password" class="form-control" required placeholder="" name="password"/>
+											<input type="password" id="password" class="form-control"placeholder="Password" required name="password"/>
 										</div>
-									</div>  
+									</div>
+									<p style="color:red;">${status}</p>  
 
 									<div class="mt-3 text-end">
 										<button class="btn btn-primary w-sm waves-effect waves-light" type="submit">Log In</button>
 									</div>
 									
 									<div class="mt-4 text-center">
+										<p class="mb-0">Login as a<a href="./GuestHome" class="fw-medium text-primary"> guest</a> </p>
 										<p class="mb-0">Don't have an account ? <a href="./SignUp" class="fw-medium text-primary"> Signup now </a> </p>
 									</div>
 								</form>

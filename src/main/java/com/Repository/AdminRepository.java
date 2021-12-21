@@ -9,6 +9,7 @@ import org.springframework.orm.hibernate5.HibernateTemplate;
 import org.springframework.stereotype.Repository;
 
 import com.Entity.Admin;
+import com.Entity.Customer;
 import com.Repository.Dao.AdminDao;
 
 @Repository("adminDao")
@@ -22,11 +23,19 @@ public class AdminRepository implements AdminDao {
 	 */
 	@SuppressWarnings("deprecation")
 	@Override
-	public boolean checkEmail(String email) {
-		for (int i = 0; i < hibernateTemplate.findByNamedParam("FROM Admin WHERE email=:email", "email", email).size(); i++) {
-			return true;
-		}
-		return false;
+	public int checkEmail(String email) {
+		return hibernateTemplate.findByNamedParam("FROM Admin WHERE email=:email", "email", email).size();
+	}
+	
+	/**
+	 * check existing password
+	 */
+	@SuppressWarnings("deprecation")
+	@Override
+	public int checkPassword(String currentPassword, int id) {
+		return hibernateTemplate.findByNamedParam("FROM Admin WHERE password=:password AND id=:id",
+				new String[] {"password","id"},
+				new Object[] {currentPassword, id}).size();
 	}
 	
 	/**
@@ -43,22 +52,38 @@ public class AdminRepository implements AdminDao {
 	 */
 	@SuppressWarnings("deprecation")
 	@Override
-	public boolean login(Admin admin) {
-		for (int i = 0; i < hibernateTemplate.findByNamedParam("FROM Admin WHERE email=:email AND password=:password",
+	public int login(Admin admin) {
+		return hibernateTemplate.findByNamedParam("FROM Admin WHERE email=:email AND password=:password",
 				new String[] {"email","password"},
-				new Object[] {admin.getEmail(), admin.getPassword()}).size(); i++) {
-			return true;
-		}
-		return false;
+				new Object[] {admin.getEmail(), admin.getPassword()}).size();
 	}
 
+	/**
+	 * get admin details by admin id
+	 */
+	@Override
+	public Admin getById(int id) {
+		return hibernateTemplate.get(Admin.class, id);
+	}
+	
 	/**
 	 * get admin details by admin email
 	 */
 	@SuppressWarnings({ "deprecation", "unchecked" })
 	@Override
 	public List<Admin> getByEmail(String email) {
-		return  (List<Admin>) hibernateTemplate.findByNamedParam("FROM User WHERE email=:email", "email", email);
+		return  (List<Admin>) hibernateTemplate.findByNamedParam("FROM Admin WHERE email=:email", "email", email);
 	}
+
+	/**
+	 * update admin details
+	 */
+	@Transactional
+	@Override
+	public void update(Admin admin) {
+		hibernateTemplate.update(admin);
+	}
+
+	
 
 }

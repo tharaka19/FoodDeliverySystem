@@ -15,7 +15,7 @@
   http://www.springframework.org/schema/mvc/spring-mvc.xsd
   ">
 
-	<context:component-scan base-package="com.controller"/>
+	<context:component-scan base-package="com.Controller"/>
 	<context:component-scan base-package="com.Service"/>
 	<context:component-scan base-package="com.Repository"/>
 
@@ -62,14 +62,24 @@
 				    <value>com.Entity.Admin</value>
 				    <value>com.Entity.Customer</value>
 				    <value>com.Entity.ShippingDetails</value>
+				    <value>com.Entity.CustomerMessage</value>
 					<value>com.Entity.Category</value>
 					<value>com.Entity.FoodItem</value>
 					<value>com.Entity.Promo</value>
 					<value>com.Entity.PromoFood</value>
+					<value>com.Entity.DeliveryLocation</value>
+					<value>com.Entity.CustomerOrder</value>
+					<value>com.Entity.Payment</value>
+					<value>com.Entity.Income</value>
+					
 			</list>
 		</property>
 
 	</bean>
+
+	
+
+
 
 	<bean class="org.springframework.orm.hibernate5.HibernateTemplate"
 		name="hibernateTemplate">

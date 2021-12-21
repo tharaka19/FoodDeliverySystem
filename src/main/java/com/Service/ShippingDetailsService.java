@@ -50,17 +50,39 @@ public class ShippingDetailsService implements ShippingDetailsBd{
 			}
 			
 		}else {}
+		//save new shipping details
 		shippingDetailsRepository.save(shippingDetails);
 	}
 	
 	/**
-	 * get all shipping details
-	 * @param id
-	 * @return shipping details list
+	 * get shipping details by shipping id
+	 */
+	@Override
+	public ShippingDetails getById(int id) {
+		return shippingDetailsRepository.getById(id);
+	}
+	
+	/**
+	 * get all shipping details by customer id
 	 */
 	@Override
 	public List<ShippingDetails> getAllById(int id) {
 		return shippingDetailsRepository.getAllById(id);
+	}
+	
+	/**
+	 * get on shipping details by shopping status and customer id 
+	 */
+	@Override
+	public ShippingDetails getOneByStatusAndCustomerId(String status, int id) {
+		shipiingDetailsList = shippingDetailsRepository.getOneByStatusAndCustomerId(status, id);
+		
+		if(shipiingDetailsList.size() > 0) {
+			return shipiingDetailsList.get(0);
+		}else {
+			return null;
+		}
+				
 	}
 	
 	/**
@@ -88,6 +110,4 @@ public class ShippingDetailsService implements ShippingDetailsBd{
 		shippingDetailsRepository.update(shippingDetails);
 	}
 
-
-	
 }

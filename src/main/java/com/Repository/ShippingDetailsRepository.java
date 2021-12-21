@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate5.HibernateTemplate;
 import org.springframework.stereotype.Repository;
 
+import com.Entity.Category;
 import com.Entity.Customer;
+import com.Entity.FoodItem;
 import com.Entity.ShippingDetails;
 import com.Repository.Dao.ShippingDetailsDao;
 
@@ -29,11 +31,8 @@ public class ShippingDetailsRepository implements ShippingDetailsDao{
 		hibernateTemplate.save(shippingDetails);
 	}
 	
-	
 	/**
 	 * get shipping details by shipping id
-	 * @param id
-	 * @return shipping details
 	 */
 	@Override
 	public ShippingDetails getById(int id) {
@@ -41,9 +40,7 @@ public class ShippingDetailsRepository implements ShippingDetailsDao{
 	}
 
 	/**
-	 * get all shipping details
-	 * @param id
-	 * @return shipping details list
+	 * get all shipping details by customer id
 	 */
 	@SuppressWarnings({ "unchecked", "deprecation" })
 	@Override
@@ -51,7 +48,18 @@ public class ShippingDetailsRepository implements ShippingDetailsDao{
 		return (List<ShippingDetails>) hibernateTemplate.findByNamedParam("FROM ShippingDetails WHERE customer=:customer", "customer",
 				hibernateTemplate.get(Customer.class, id));
 	}
-
+	
+	/**
+	 * get all shipping details by shipping status and customer id
+	 */
+	@SuppressWarnings({ "unchecked", "deprecation" })
+	@Override
+	public List<ShippingDetails> getOneByStatusAndCustomerId(String status, int id) {
+		return  (List<ShippingDetails>) hibernateTemplate.findByNamedParam("FROM ShippingDetails WHERE status=:status AND customer=:customer",
+				new String[] {"status","customer"},
+				new Object[] {status,hibernateTemplate.get(Customer.class, id)});
+	}
+	
 	/**
 	 * update shipping details
 	 */

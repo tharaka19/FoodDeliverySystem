@@ -1,4 +1,4 @@
-package com.controller;
+package com.Controller;
 
 import java.util.List;
 
@@ -117,7 +117,7 @@ public class FoodItemController {
 	 */
 	@PostMapping("/AdminDashbord/FoodItem/updateFoodItem")
 	@ResponseBody
-	public String updateStudent(@ModelAttribute("updateFoodItem") FoodItem foodItem){
+	public String updateFoodItem(@ModelAttribute("updateFoodItem") FoodItem foodItem){
 		foodItemService.update(foodItem);
 	    return "updated";
 	}
@@ -172,4 +172,5 @@ public class FoodItemController {
 		foodItemService.delete(id);
 		return "deleted";
 	}
+	
 }

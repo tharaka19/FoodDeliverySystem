@@ -22,11 +22,19 @@ public class CustomerRepository implements CustomerDao {
 	 */
 	@SuppressWarnings("deprecation")
 	@Override
-	public boolean checkEmail(String email) {
-		for (int i = 0; i < hibernateTemplate.findByNamedParam("FROM Customer WHERE email=:email", "email", email).size(); i++) {
-			return true;
-		}
-		return false;
+	public int checkEmail(String email) {
+		return hibernateTemplate.findByNamedParam("FROM Customer WHERE email=:email", "email", email).size();
+	}
+	
+	/**
+	 * check existing password
+	 */
+	@SuppressWarnings("deprecation")
+	@Override
+	public int checkPassword(String currentPassword, int id) {
+		return hibernateTemplate.findByNamedParam("FROM Customer WHERE password=:password AND id=:id",
+				new String[] {"password","id"},
+				new Object[] {currentPassword, id}).size();
 	}
 	
 	/**
@@ -36,12 +44,6 @@ public class CustomerRepository implements CustomerDao {
 	@Override
 	public int save(Customer customer) {
 		return (int) hibernateTemplate.save(customer);
-	}
-	
-	@Transactional
-	@Override
-	public void saveAdddress(Customer customer) {
-		hibernateTemplate.saveOrUpdate(customer);
 	}	
 
 	/**
@@ -49,13 +51,18 @@ public class CustomerRepository implements CustomerDao {
 	 */
 	@SuppressWarnings("deprecation")
 	@Override
-	public boolean login(Customer customer) {
-		for (int i = 0; i < hibernateTemplate.findByNamedParam("FROM Customer WHERE email=:email AND password=:password",
+	public int login(Customer customer) {
+		return hibernateTemplate.findByNamedParam("FROM Customer WHERE email=:email AND password=:password",
 				new String[] {"email","password"},
-				new Object[] {customer.getEmail(), customer.getPassword()}).size(); i++) {
-			return true;
-		}
-		return false;
+				new Object[] {customer.getEmail(), customer.getPassword()}).size();
+	}
+	
+	/**
+	 * get all customer details
+	 */
+	@Override
+	public List<Customer> getAllCustomer() {
+		return hibernateTemplate.loadAll(Customer.class);
 	}
 	
 	/**
@@ -74,8 +81,23 @@ public class CustomerRepository implements CustomerDao {
 	public List<Customer> getByEmail(String email) {
 		return (List<Customer>) hibernateTemplate.findByNamedParam("FROM User WHERE email=:email", "email", email);
 	}
-
 	
+	/**
+	 * update Customer details
+	 */
+	@Transactional
+	@Override
+	public void update(Customer customer) {
+		hibernateTemplate.update(customer);
+	}
 
+	/**
+	 * delete customer item details by customer id
+	 */
+	@Transactional
+	@Override
+	public void delete(Customer customer) {
+		hibernateTemplate.delete(customer);
+	}
 	
 }

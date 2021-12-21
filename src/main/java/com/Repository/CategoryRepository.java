@@ -28,7 +28,6 @@ public class CategoryRepository implements CategoryDao{
 
 	/**
 	 * get all category details
-	 * @return category list
 	 */
 	@Override
 	public List<Category> getAll() {
@@ -37,8 +36,6 @@ public class CategoryRepository implements CategoryDao{
 
 	/**
 	 * get category details by category id
-	 * @param id
-	 * @return category
 	 */
 	@Override
 	public Category getById(int id) {
@@ -47,8 +44,6 @@ public class CategoryRepository implements CategoryDao{
 	
 	/**
 	 * get category details by category status
-	 * @param status
-	 * @return category list
 	 */
 	@SuppressWarnings({ "deprecation", "unchecked" })
 	@Override
@@ -82,34 +77,5 @@ public class CategoryRepository implements CategoryDao{
 	public void delete(Category category) {
 		hibernateTemplate.delete(category);	
 	}
-
-	
-
-	
-
-
-	
-	/*
-	 * @Override
-	 * 
-	 * @Transactional public void updateStatusById(String status, int id) { Category
-	 * category = hibernateTemplate.get(Category.class, id);
-	 * category.setStatus(status); hibernateTemplate.update(category); }
-	 */
-	
-	/*
-	 * @Override
-	 * 
-	 * @Transactional public void delete(int id) {
-	 * hibernateTemplate.delete(hibernateTemplate.get(Category.class, id)); }
-	 */
-
-	
-
-
-
-
-
-	
 	
 }

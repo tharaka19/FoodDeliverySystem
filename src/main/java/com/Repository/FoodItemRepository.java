@@ -31,7 +31,6 @@ public class FoodItemRepository implements FoodItemDao{
 
 	/**
 	 * get all food item details
-	 * @return food item list
 	 */
 	@Override
 	public List<FoodItem> getAll() {
@@ -40,8 +39,6 @@ public class FoodItemRepository implements FoodItemDao{
 
 	/**
 	 * get food item details by food item id
-	 * @param id
-	 * @return food item
 	 */
 	@Override
 	public FoodItem getById(int id) {
@@ -50,8 +47,6 @@ public class FoodItemRepository implements FoodItemDao{
 	
 	/**
 	 * get active food item details by food item status
-	 * @param status
-	 * @return food item list for adminDashboard page
 	 */
 	@SuppressWarnings({ "deprecation", "unchecked" })
 	@Override
@@ -61,8 +56,6 @@ public class FoodItemRepository implements FoodItemDao{
 
 	/**
 	 * get food item quantity by food item id
-	 * @param status
-	 * @return food item quantity
 	 */
 	@Override
 	public int getQuantityById(int id) {
@@ -71,8 +64,6 @@ public class FoodItemRepository implements FoodItemDao{
 	
 	/**
 	 * get all food item details by food item status and category id
-	 * @param status
-	 * @return food item list
 	 */
 	@SuppressWarnings({ "deprecation", "unchecked" })
 	@Override

@@ -13,5 +13,6 @@ public interface PromoBd {
 	public int getQuantityById(int id);
 	public void update(Promo promo);
 	public void updateStatusById(String status,int id);
+	public void updateQuantityById(int quantity, int id);
 	public void delete(int id);
 }

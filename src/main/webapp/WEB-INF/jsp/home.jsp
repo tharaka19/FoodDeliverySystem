@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-    pageEncoding="ISO-8859-1" import= "com.Entity.Customer"%>
+    pageEncoding="ISO-8859-1" import= "com.Entity.Customer" import= "com.Entity.ShoppingCart" import= "com.Entity.Customer" import="java.util.List"%>
 <%@taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>    
 <!DOCTYPE html>
@@ -48,6 +48,49 @@
     <meta property="og:title" content="Home">
     <meta property="og:description" content="">
     <meta property="og:type" content="website">
+    
+    
+    <%
+		Customer customer = null;
+        if(session.getAttribute("customer") == null) {
+
+     	}else{
+     		customer = (Customer) session.getAttribute("customer");
+     	}
+		
+		%>
+    
+    <% 
+        float foodItemSubTotal = 0;
+        int foodItemCount = 0;
+     	if(session.getAttribute("foodItemCart") == null) {
+
+     	}else{
+     		 List<ShoppingCart> foodItemCartList = (List<ShoppingCart>) session.getAttribute("foodItemCart");
+        
+             for(int a = 0; a < foodItemCartList.size(); a++){
+            	 foodItemSubTotal = foodItemSubTotal + foodItemCartList.get(a).getFoodItemTotal();
+            	 foodItemCount = foodItemCount + 1;
+             }
+     	}
+     %>
+     
+     <% 
+        float promoSubTotal = 0;
+     	float totalDiscount = 0;
+     	int promoCount = 0;
+     	if(session.getAttribute("promoCart") == null) {
+
+     	}else{
+     		 List<ShoppingCart> promoCartList = (List<ShoppingCart>) session.getAttribute("promoCart");
+        
+             for(int a = 0; a < promoCartList.size(); a++){
+            	 promoSubTotal = promoSubTotal + promoCartList.get(a).getPromoTotal();
+            	 totalDiscount = totalDiscount + promoCartList.get(a).getPromoTotalDiscount();
+            	 promoCount = promoCount +1;
+             }
+     	}
+     %>
     
     <script>
 
@@ -132,11 +175,38 @@
 							}
 						});
 	}
+
+	function sendMessage(){
+		
+			$.ajax({
+				type : "POST",
+				url : "Home/sendMessage",
+				data : {
+		
+					customerId : <% out.print(customer.getId());%>,
+					message :  $("#message").val(),
+
+				},
+				success : function(result) {
+
+					document.location.reload(true);
+				},
+				error : function(err) {
+
+				}
+			});
+			
+	}
     
     </script>
     
   </head>
   <body data-home-page="Home.html" data-home-page-title="Home" class="u-body u-overlap"><header class=" u-clearfix u-header u-section-row-container" id="sec-8947"><div class="u-section-rows" style="margin-bottom: 0px;">
+     
+     
+        
+        
+        
         <div class="u-section-row u-sticky u-sticky-e2a9 u-section-row-1" id="sec-71fa">
           
           
@@ -219,7 +289,7 @@
             <a class="u-shopping-cart u-shopping-cart-1" href="./ShoppingCart"><span class="u-icon u-shopping-cart-icon"><svg class="u-svg-link" preserveAspectRatio="xMidYMin slice" viewBox="0 0 16 16" style=""><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-58a1"></use></svg><svg class="u-svg-content" viewBox="0 0 16 16" x="0px" y="0px" id="svg-58a1"><path d="M14.5,3l-2.1,5H6.1L5.9,7.6L4,3H14.5 M0,0v1h2.1L5,8l-2,4h11v-1H4.6l1-2H13l3-7H3.6L2.8,0H0z M12.5,13
 	c-0.8,0-1.5,0.7-1.5,1.5s0.7,1.5,1.5,1.5s1.5-0.7,1.5-1.5S13.3,13,12.5,13L12.5,13z M4.5,13C3.7,13,3,13.7,3,14.5S3.7,16,4.5,16
 	S6,15.3,6,14.5S5.3,13,4.5,13L4.5,13z"></path></svg>
-        <span class="u-icon-circle u-palette-1-base u-shopping-cart-count" style="font-size: 0.75rem;"><!--shopping_cart_count-->2<!--/shopping_cart_count--></span>
+        <span class="u-icon-circle u-palette-1-base u-shopping-cart-count" style="font-size: 0.75rem;"><!--shopping_cart_count--><%out.print(foodItemCount + promoCount);%><!--/shopping_cart_count--></span>
     </span>
             </a><!--/shopping_cart-->
           </div>
@@ -321,7 +391,7 @@
                 <div class="u-container-layout u-container-layout-1"><span class="u-icon u-icon-circle u-text-palette-1-base u-icon-1" data-animation-name="slideIn" data-animation-duration="1000" data-animation-delay="0" data-animation-direction="Down"><svg class="u-svg-link" preserveAspectRatio="xMidYMin slice" viewBox="0 0 256 256" style=""><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-8570"></use></svg><svg class="u-svg-content" viewBox="0 0 256 256" id="svg-8570"><g><path d="m146.582 19.667c-1.684-8.64-9.361-15.167-18.582-15.167s-16.898 6.528-18.582 15.169c-10.724-9.463-27.974-2.014-27.974 12.41 0 7.607 5.149 14.022 12.19 16.001v21.44h68.734v-21.448c7.041-1.979 12.19-8.394 12.19-15.993 0-14.389-17.229-21.898-27.976-12.412z" fill="#f2e1d6"></path><path d="m144.93 127.49v10.85l-3.87 1.24c-3.03.98-4.98 3.91-4.71 7.08l.6 12.34h-18.07l.59-12.34c.28-3.17-1.67-6.1-4.7-7.08l-3.7-1.19v-10.88c10.383 5.83 23.268 5.961 33.86-.02z" fill="#ffb69f"></path><path d="m93.632 69.518v19.258l13.803-19.258z" fill="#afafaf"></path><path d="m148.565 69.518 13.803 19.258v-19.258z" fill="#afafaf"></path><path d="m165.84 84.256h-3.47v-14.736h-68.74v14.736h-3.47c-5.482 0-9.89 4.394-9.89 9.789 0 5.405 4.422 9.789 9.89 9.789h4.001c1.851 10.358 8.27 18.836 16.909 23.675 10.383 5.83 23.268 5.961 33.86-.02 8.689-4.859 15.088-13.388 16.909-23.655h4.001c5.482 0 9.89-4.393 9.89-9.789 0-5.404-4.422-9.789-9.89-9.789z" fill="#ffb69f"></path><path d="m200.77 180.52c-1.17-11.6-8.96-21.48-19.97-25.32l-29.19-10.18.034-6.087c.008-1.362-1.318-2.333-2.614-1.915l-4.101 1.322-3.87 1.24c-3.03.98-4.98 3.91-4.71 7.08l.6 12.34h-18.07l.59-12.34c.28-3.17-1.67-6.1-4.7-7.08l-3.7-1.19-4.272-1.374c-1.296-.417-2.62.554-2.613 1.915l.035 6.149-29.019 10.12c-11.01 3.84-18.8 13.72-19.97 25.32l-7 69.48h159.54z" fill="#f2e1d6"></path><g fill="#f0c020"><path d="m71.58 127.487c-3.961-1.309-8.051-2.453-10.348-12.345-2.115 9.112-5.504 10.745-10.348 12.345 7.9 2.61 9.092 6.933 10.348 12.345 2.165-9.33 5.745-10.825 10.348-12.345z"></path><path d="m204.31 60.214c-3.961-1.309-8.051-2.453-10.348-12.345-2.115 9.112-5.504 10.745-10.348 12.345 7.9 2.61 9.092 6.933 10.348 12.345 2.165-9.33 5.746-10.825 10.348-12.345z"></path><path d="m224.979 98.055c-3.961-1.309-8.051-2.453-10.348-12.345-2.115 9.112-5.504 10.745-10.348 12.345 7.9 2.61 9.092 6.933 10.348 12.345 2.165-9.329 5.746-10.824 10.348-12.345z"></path>
 </g><path d="m120.33 107.95c-.46-1.25-1.95-1.93-3.21-1.46-1.288.491-1.953 1.918-1.47 3.22l.01.01c1.838 4.936 6.659 8.47 12.34 8.47 5.67 0 10.477-3.517 12.35-8.47.49-1.29-.16-2.74-1.45-3.23-1.26-.47-2.75.21-3.22 1.46-1.189 3.13-4.27 5.24-7.68 5.24s-6.49-2.1-7.67-5.24z"></path><path d="m109.507 89.023v2.003c0 1.381 1.119 2.5 2.5 2.5s2.5-1.119 2.5-2.5v-2.003c0-1.381-1.119-2.5-2.5-2.5s-2.5 1.12-2.5 2.5z"></path><path d="m141.493 89.023v2.003c0 1.381 1.119 2.5 2.5 2.5s2.5-1.119 2.5-2.5v-2.003c0-1.381-1.119-2.5-2.5-2.5s-2.5 1.12-2.5 2.5z"></path><path d="m130.5 98.059v-10.285c0-1.381-1.119-2.5-2.5-2.5s-2.5 1.119-2.5 2.5v10.284c0 1.381 1.119 2.5 2.5 2.5s2.5-1.119 2.5-2.499z"></path><path d="m119.75 174.75c1.381 0 2.5-1.119 2.5-2.5v-1.25c0-1.381-1.119-2.5-2.5-2.5s-2.5 1.119-2.5 2.5v1.25c0 1.381 1.119 2.5 2.5 2.5z"></path><path d="m137.125 174.75c1.381 0 2.5-1.119 2.5-2.5v-1.25c0-1.381-1.119-2.5-2.5-2.5s-2.5 1.119-2.5 2.5v1.25c0 1.381 1.119 2.5 2.5 2.5z"></path><path d="m117.25 191.25c0 1.381 1.119 2.5 2.5 2.5s2.5-1.119 2.5-2.5v-1.25c0-1.381-1.119-2.5-2.5-2.5s-2.5 1.119-2.5 2.5z"></path><path d="m134.625 191.25c0 1.381 1.119 2.5 2.5 2.5s2.5-1.119 2.5-2.5v-1.25c0-1.381-1.119-2.5-2.5-2.5s-2.5 1.119-2.5 2.5z"></path><path d="m117.25 210.25c0 1.381 1.119 2.5 2.5 2.5s2.5-1.119 2.5-2.5v-1.25c0-1.381-1.119-2.5-2.5-2.5s-2.5 1.119-2.5 2.5z"></path><path d="m134.625 210.25c0 1.381 1.119 2.5 2.5 2.5s2.5-1.119 2.5-2.5v-1.25c0-1.381-1.119-2.5-2.5-2.5s-2.5 1.119-2.5 2.5z"></path><path d="m117.25 229.25c0 1.381 1.119 2.5 2.5 2.5s2.5-1.119 2.5-2.5v-1.25c0-1.381-1.119-2.5-2.5-2.5s-2.5 1.119-2.5 2.5z"></path><path d="m134.625 229.25c0 1.381 1.119 2.5 2.5 2.5s2.5-1.119 2.5-2.5v-1.25c0-1.381-1.119-2.5-2.5-2.5s-2.5 1.119-2.5 2.5z"></path><path d="m52.2 210.61c-1.37-.14-2.6.87-2.74 2.24-.149 1.453.998 2.75 2.49 2.75 1.29 0 2.36-.97 2.48-2.25.14-1.37-.86-2.6-2.23-2.74z"></path><path d="m52.74 180.27-2.28 22.63c-.14 1.37.87 2.6 2.24 2.74 1.37.13 2.6-.87 2.74-2.24l2.28-22.63c1.07-10.59 8.25-19.7 18.3-23.21l29.02-10.12c1.01-.35 1.69-1.31 1.68-2.37l-.03-5.46c3.072.986 4.108 1.32 7.31 2.35 1.782.577 3.135 2.256 2.98 4.48l-.485 10.06h-11.245c-1.555 0-2.736 1.408-2.46 2.942 7.077 39.423 2.025 89.798 1.974 90.302-.141 1.374.857 2.602 2.231 2.743 1.39.141 2.603-.871 2.743-2.231.051-.499 4.931-49.121-1.523-88.756h39.036c1.381 0 2.5-1.119 2.5-2.5s-1.119-2.5-2.5-2.5h-7.916c-.01-.203-.479-9.888-.495-10.09-.195-1.797.939-3.789 2.99-4.45 8.802-2.829-1.493.48 7.31-2.35l-.03 5.4c-.01 1.06.671 2.02 1.681 2.37l29.189 10.18c10.051 3.5 17.23 12.61 18.301 23.21l7 69.48c.148 1.459 1.489 2.4 2.739 2.24 1.37-.14 2.38-1.37 2.24-2.74v-.01l-7-69.47c-1.244-12.377-9.533-23.215-21.64-27.43l-27.5-9.59.02-4.3c0-3.068-2.985-5.26-5.899-4.31l-.811.261v-5.995c.246-.15.501-.291.74-.446 1.16-.75 1.49-2.3.74-3.46-.721-1.12-2.33-1.47-3.46-.74-20.828 13.627-49.318-1.063-49.318-26.352v-8.329l12.586-17.559h38.563l12.586 17.558v8.329c0 4.208-.878 8.502-2.577 12.432-.563 1.291.039 2.762 1.3 3.29 1.229.54 2.75-.07 3.29-1.3 0 0 0 0 0-.01.833-1.928 1.502-3.934 1.991-5.985h1.969c6.832 0 12.391-5.513 12.391-12.29s-5.559-12.289-12.391-12.289h-.97c0-11.415 0-20.587 0-31.886 7.074-2.77 12.169-9.625 12.189-17.79 0-1.35-.149-2.7-.43-4-.28-1.32-1.64-2.21-2.97-1.92-1.409.304-2.204 1.682-1.91 2.97.2.96.31 1.95.31 2.95 0 7.848-6.533 14.216-14.45 14.132-1.388-.098-2.571.945-2.666 2.323s.945 2.571 2.322 2.666c.731.049 1.873-.034 2.604-.114v15.932c-11.537 0-12.049.001-12.186.001v-9.455c0-1.381-1.119-2.5-2.5-2.5s-2.5 1.119-2.5 2.5v9.455h-12.184v-9.455c0-1.381-1.119-2.5-2.5-2.5s-2.5 1.119-2.5 2.5v9.455h-12.184v-9.455c0-1.381-1.119-2.5-2.5-2.5s-2.5 1.119-2.5 2.5v9.455c-.092 0 .644-.001-12.188-.001v-15.928c1.221.132 2.174.141 2.604.111 1.373-.095 2.398-1.28 2.311-2.653-.088-1.374-1.292-2.421-2.654-2.335-7.95.079-14.451-6.284-14.451-14.132.031-12.208 14.666-18.611 23.82-10.54 1.414 1.263 3.738.534 4.11-1.39 1.469-7.553 8.185-13.151 16.143-13.151 7.86 0 14.64 5.53 16.12 13.15.373 1.91 2.681 2.646 4.11 1.39 3.323-2.931 7.751-4.094 11.859-3.4 1.36.22 2.65-.72 2.87-2.07.22-1.36-.7-2.64-2.06-2.87-4.376-.715-8.978.081-12.92 2.38-3.09-7.928-10.843-13.58-19.989-13.58-9.131 0-16.893 5.635-19.99 13.58-12.663-7.385-29.041 1.549-29.07 16.5.02 8.08 4.997 14.959 12.2 17.8 0 5.677-.01 26.199-.01 31.876h-.97c-6.832 0-12.39 5.513-12.39 12.289s5.558 12.29 12.39 12.29h1.969c2.241 9.409 8.128 17.493 16.441 22.592v6.037l-1.01-.324c-2.809-.956-5.87 1.2-5.87 4.29l.02 4.38-27.33 9.53c-11.804 4.109-20.364 14.733-21.64 27.43zm43.392-99.273v-8.977h6.435zm63.736-8.977v8.977l-6.435-8.977zm5.972 14.736c4.075 0 7.391 3.27 7.391 7.289 0 4.02-3.315 7.29-7.391 7.29h-1.135c.001-.008.001-.016.002-.023.106-1.123.163-2.259.163-3.401v-11.155zm-75.68 14.578c-4.075 0-7.39-3.27-7.39-7.29 0-4.019 3.315-7.289 7.39-7.289h.97v11.155c0 1.132.055 2.26.16 3.375.002.016.002.033.004.05h-1.134zm23.41 30.176c9.23 3.898 19.666 3.886 28.86-.01v5.013l-2.13.687c-4.205 1.355-6.808 5.398-6.45 9.61l.47 9.69h-12.82l.47-9.72c.353-4.23-2.269-8.232-6.43-9.58l-1.97-.632z"></path><path d="m47.98 252.49c1.262.162 2.593-.79 2.74-2.24l2.71-26.95c.14-1.37-.86-2.6-2.23-2.74s-2.6.87-2.74 2.24l-2.72 26.95c-.14 1.37.87 2.6 2.24 2.74z"></path><path d="m76.825 252.499c1.38-.043 2.464-1.197 2.42-2.577l-1.842-58.75c-.043-1.38-1.21-2.455-2.577-2.42-1.38.043-2.464 1.197-2.42 2.577l1.842 58.75c.044 1.407 1.233 2.469 2.577 2.42z"></path><path d="m176.75 249.92c-.04 1.373 1.05 2.58 2.51 2.58 1.35 0 2.45-1.06 2.49-2.42l.78-24.99c.05-1.38-1.04-2.53-2.421-2.58-1.39-.06-2.529 1.04-2.569 2.42z"></path><path d="m180.66 207.52c1.359 0 2.46-1.06 2.5-2.42l.43-13.77c.05-1.38-1.04-2.54-2.42-2.58-1.38-.05-2.53 1.04-2.57 2.42l-.439 13.77c-.041 1.385 1.064 2.58 2.499 2.58z"></path><path d="m180.35 217.52c1.36 0 2.46-1.07 2.5-2.43.043-1.391-1.057-2.529-2.42-2.57-1.41-.07-2.54 1.03-2.58 2.42-.041 1.401 1.077 2.58 2.5 2.58z"></path><path d="m152.399 118.17c-.924 1.096-.719 2.668.29 3.52 1.017.882 2.598.795 3.521-.28.9-1.067.761-2.641-.28-3.52-1.02-.86-2.67-.73-3.531.28z"></path><path d="m171.16 21.75c.939-1.01.89-2.59-.11-3.54-.96-.91-2.62-.86-3.53.11-.905.944-.947 2.527.101 3.53.99.928 2.562.917 3.539-.1z"></path><path d="m50.05 130.012c6.686 2.209 7.444 5.476 8.591 10.421.637 2.743 4.545 2.742 5.182 0 1.905-8.212 4.709-9.139 8.591-10.421 2.424-.801 2.43-4.249 0-5.051-3.729-1.228-6.641-2.022-8.591-10.421-.635-2.737-4.548-2.73-5.181 0-1.907 8.213-4.566 9.091-8.591 10.422-2.425.8-2.43 4.248-.001 5.05zm11.192-7.102c1.2 2.161 2.566 3.591 3.977 4.601-1.472 1.035-2.794 2.423-3.934 4.439-.942-1.587-2.25-3.089-4.164-4.403 1.548-1.062 2.934-2.503 4.121-4.637z"></path><path d="m182.781 62.739c6.686 2.209 7.444 5.476 8.591 10.421.637 2.743 4.545 2.742 5.182 0 1.905-8.212 4.709-9.139 8.591-10.421 2.424-.801 2.43-4.249 0-5.051-3.729-1.228-6.641-2.022-8.591-10.421-.635-2.737-4.548-2.73-5.181 0-1.907 8.213-4.566 9.092-8.591 10.422-2.425.8-2.431 4.248-.001 5.05zm11.192-7.102c1.2 2.161 2.566 3.592 3.977 4.601-1.472 1.035-2.794 2.423-3.934 4.439-.942-1.587-2.25-3.089-4.164-4.403 1.548-1.062 2.934-2.503 4.121-4.637z"></path><path d="m203.45 100.581c6.686 2.209 7.444 5.476 8.591 10.421.637 2.743 4.545 2.742 5.182 0 1.905-8.212 4.709-9.139 8.591-10.421 2.424-.801 2.43-4.249 0-5.051-3.729-1.228-6.641-2.022-8.591-10.421-.635-2.737-4.548-2.73-5.181 0-1.907 8.213-4.566 9.092-8.591 10.422-2.426.8-2.431 4.247-.001 5.05zm11.191-7.103c1.2 2.161 2.566 3.591 3.977 4.601-1.472 1.035-2.794 2.423-3.934 4.439-.942-1.587-2.25-3.089-4.164-4.403 1.549-1.061 2.935-2.503 4.121-4.637z"></path>
 </g></svg></span>
-                  <h6 class="u-align-center u-text u-text-default u-text-3"> World’s best Chef</h6>
+                  <h6 class="u-align-center u-text u-text-default u-text-3"> World's best Chef</h6>
                   <p class="u-align-center u-text u-text-default u-text-4"> We can confidently say that our chefs provide excellent service for you, friends, familers and your lovings !</p>
                 </div>
               </div>
@@ -542,26 +612,29 @@ c0-7.4,3.4-18.8,18.8-18.8h13.8v15.4H75.5z"></path></svg></span>
               <div class="u-container-style u-custom-color-2 u-layout-cell u-right-cell u-size-19-sm u-size-19-xs u-size-20-lg u-size-20-xl u-size-60-md u-layout-cell-3">
                 <div class="u-container-layout u-valign-top u-container-layout-3">
                   <div class="u-expanded-width u-form u-form-1">
-                    <form action="#" method="POST" class="u-clearfix u-form-spacing-10 u-form-vertical u-inner-form" style="padding: 0;" source="custom" name="form">
+                    <form class="u-clearfix u-form-spacing-10 u-form-vertical u-inner-form" style="padding: 0;" source="custom" name="form">
+                    
                       <div class="u-form-group u-form-name">
                         <label for="name-daf4" class="u-form-control-hidden u-label">Name</label>
-                        <input type="text" placeholder="Enter your Name" id="name-daf4" name="name" class="u-input u-input-rectangle u-white" required="">
+                        <input type="text" placeholder="Enter your Name" id="fullName" name="name" value="<% out.print(customer.getFirstName()+" "+customer.getLastName());%>" readonly="readonly" class="u-input u-input-rectangle u-white" required="">
                       </div>
+                      
                       <div class="u-form-email u-form-group">
                         <label for="email-daf4" class="u-form-control-hidden u-label">Email</label>
-                        <input type="email" placeholder="Enter a valid email address" id="email-daf4" name="email" class="u-input u-input-rectangle u-white" required="">
+                        <input type="email" placeholder="Enter a valid email address" id="email" name="email" value="<% out.print(customer.getEmail()); %>" readonly="readonly" class="u-input u-input-rectangle u-white" required="">
                       </div>
+                      
                       <div class="u-form-group u-form-message">
                         <label for="message-daf4" class="u-form-control-hidden u-label">Message</label>
-                        <textarea placeholder="" rows="4" cols="50" id="message-daf4" name="message" class="u-input u-input-rectangle u-white" required=""></textarea>
+                        <textarea  rows="4" cols="50" id="message" name="message" class="u-input u-input-rectangle u-white" required=""></textarea>
                       </div>
+                      
                       <div class="u-align-left u-form-group u-form-submit">
-                        <a href="#" class="u-active-palette-2-base u-black u-border-none u-btn u-btn-submit u-button-style u-hover-custom-color-1 u-btn-4">Submit</a>
-                        <input type="submit" value="submit" class="u-form-control-hidden">
+                        <a class="u-active-palette-2-base u-black u-border-none u-btn u-btn-submit u-button-style u-hover-custom-color-1 u-btn-4">Submit</a>
+                        <input type="submit" value="submit" onclick="sendMessage()" class="u-form-control-hidden">
                       </div>
-                      <div class="u-form-send-message u-form-send-success"> Thank you! Your message has been sent. </div>
-                      <div class="u-form-send-error u-form-send-message"> Unable to send your message. Please fix errors then try again. </div>
-                      <input type="hidden" value="" name="recaptchaResponse">
+                     
+                      
                     </form>
                   </div>
                 </div>

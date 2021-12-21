@@ -34,8 +34,7 @@ public class PromoFoodService implements PromoFoodBd{
 	}
 
 	/**
-	 * get all promo food 
-	 * @return promo food list
+	 * get all promo food
 	 */
 	@Override
 	public List<PromoFood> getAll() {
@@ -44,8 +43,6 @@ public class PromoFoodService implements PromoFoodBd{
 	
 	/**
 	 * get promo food details by promo food id
-	 * @param id
-	 * @return promo food
 	 */
 	@Override
 	public PromoFood getById(int id) {
@@ -54,9 +51,6 @@ public class PromoFoodService implements PromoFoodBd{
 	
 	/**
 	 * get promo food details by promo food id and status
-	 * @param status
-	 * @param id
-	 * @return promo food list
 	 */
 	@Override
 	public List<PromoFood> getOnePromoDetailsById(String status, int id) {
@@ -107,8 +101,7 @@ public class PromoFoodService implements PromoFoodBd{
 		for(PromoFood promoFood : promoFoodList) {
 			promoFood.setStatus(status);
 			promoFoodRepository.updateStatus(promoFood);
-		}
-		
+		}	
 	}
 	
 	/**
@@ -121,8 +114,7 @@ public class PromoFoodService implements PromoFoodBd{
 			return true;
 		}else {
 			return false;
-		}
-		
+		}		
 	}
 
 	/**
@@ -132,9 +124,5 @@ public class PromoFoodService implements PromoFoodBd{
 	public void delete(int id) {
 		promoFoodRepository.delete(promoFoodRepository.getById(id));		
 	}
-
-
-
-	
 
 }

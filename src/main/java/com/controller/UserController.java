@@ -1,4 +1,4 @@
-package com.controller;
+package com.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -24,14 +24,27 @@ public class UserController {
 	}
 	
 	/**
-	 * update user details
+	 * update customer details
 	 * @param user
 	 * @return
 	 */
 	@PostMapping("/MyAccount/updateCustomer")
 	@ResponseBody
-	public String update(@ModelAttribute("updateCustomer") User user){
+	public String updateCustomer(@ModelAttribute("updateCustomer") User user){
 		userService.update(user);
 		return "updated";
 	}
+	
+	/**
+	 * update admin details
+	 * @param user
+	 * @return
+	 */
+	@PostMapping("/AdminDashbord/Profile/updateAdmin")
+	@ResponseBody
+	public String updateAdmin(@ModelAttribute("updateAdmin") User user){
+		userService.update(user);
+		return "updated";
+	}
+	
 }

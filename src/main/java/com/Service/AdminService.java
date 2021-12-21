@@ -12,6 +12,8 @@ import com.Service.Bd.AdminBd;
 @Service("adminBd")
 public class AdminService implements AdminBd {
 
+	private Admin admin;
+	
 	@Autowired
 	private AdminDao adminRepository;
 	
@@ -28,7 +30,23 @@ public class AdminService implements AdminBd {
 	 */
 	@Override
 	public boolean checkEmail(String email) {
-		return adminRepository.checkEmail(email);
+		if(adminRepository.checkEmail(email) > 0){
+			return true;
+		}else {
+			return false;
+		}
+	}
+	
+    /**
+     * check existing password by admin id
+     */
+	@Override
+	public boolean checkPassword(String currentPassword, int id) {
+		if(adminRepository.checkPassword(currentPassword, id) > 0) {
+			return true;
+		}else {
+			return false;
+		}
 	}
 	
 	/**
@@ -44,7 +62,19 @@ public class AdminService implements AdminBd {
 	 */
 	@Override
 	public boolean login(Admin admin) {
-		return adminRepository.login(admin);
+		if(adminRepository.login(admin) > 0 ) {
+			return true;
+		}else {
+			return false;
+		}
+	}
+	
+	/**
+	 * get admin details by admin id
+	 */
+	@Override
+	public Admin getById(int id) {
+		return adminRepository.getById(id);
 	}
 
 	/**
@@ -52,17 +82,30 @@ public class AdminService implements AdminBd {
 	 */
 	@Override
 	public Admin getByEmail(String email) {
+		//get admin details by admin email
 		List<Admin> adminList =  adminRepository.getByEmail(email);
 		
-		for(Admin admin : adminList) {
-			System.out.println(admin.getFirstName());
-			return admin;
+		if(adminList.size() > 0) {
+			return adminList.get(0);
+		}else {
+			return null;
 		}
-		
-		return null;
 	}
 
+	/**
+	 * update password by admin id
+	 */
+	@Override
+	public void updatePassword(String password, int id) {
+		admin = new Admin();
+		
+		//get admin details by admin id
+		admin = adminRepository.getById(id);
+		
+		//set admin password
+		admin.setPassword(password);
+		
+		adminRepository.update(admin);
+	}
 
-
-	
 }

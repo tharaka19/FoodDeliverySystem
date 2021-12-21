@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-    pageEncoding="ISO-8859-1"%>
+    pageEncoding="ISO-8859-1" import= "com.Entity.ShoppingCart" import= "com.Entity.Customer" import="java.util.List"%>
 <%@taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>        
 <!DOCTYPE html>
@@ -41,8 +41,45 @@
     <meta property="og:title" content="Contact">
     <meta property="og:description" content="">
     <meta property="og:type" content="website">
+    
+    
+    <% 
+        float foodItemSubTotal = 0;
+        int foodItemCount = 0;
+     	if(session.getAttribute("foodItemCart") == null) {
+
+     	}else{
+     		 List<ShoppingCart> foodItemCartList = (List<ShoppingCart>) session.getAttribute("foodItemCart");
+        
+             for(int a = 0; a < foodItemCartList.size(); a++){
+            	 foodItemSubTotal = foodItemSubTotal + foodItemCartList.get(a).getFoodItemTotal();
+            	 foodItemCount = foodItemCount + 1;
+             }
+     	}
+     %>
+     
+     <% 
+        float promoSubTotal = 0;
+     	float totalDiscount = 0;
+     	int promoCount = 0;
+     	if(session.getAttribute("promoCart") == null) {
+
+     	}else{
+     		 List<ShoppingCart> promoCartList = (List<ShoppingCart>) session.getAttribute("promoCart");
+        
+             for(int a = 0; a < promoCartList.size(); a++){
+            	 promoSubTotal = promoSubTotal + promoCartList.get(a).getPromoTotal();
+            	 totalDiscount = totalDiscount + promoCartList.get(a).getPromoTotalDiscount();
+            	 promoCount = promoCount +1;
+             }
+     	}
+     %>
+    
   </head>
   <body class="u-body u-overlap"><header class=" u-clearfix u-header u-section-row-container" id="sec-8947"><div class="u-section-rows" style="margin-bottom: 0px;">
+        
+        
+        
         <div class="u-section-row u-sticky u-sticky-e2a9 u-section-row-1" id="sec-71fa">
           
           
@@ -125,7 +162,7 @@
             <a class="u-shopping-cart u-shopping-cart-1" href="./ShoppingCart"><span class="u-icon u-shopping-cart-icon"><svg class="u-svg-link" preserveAspectRatio="xMidYMin slice" viewBox="0 0 16 16" style=""><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-58a1"></use></svg><svg class="u-svg-content" viewBox="0 0 16 16" x="0px" y="0px" id="svg-58a1"><path d="M14.5,3l-2.1,5H6.1L5.9,7.6L4,3H14.5 M0,0v1h2.1L5,8l-2,4h11v-1H4.6l1-2H13l3-7H3.6L2.8,0H0z M12.5,13
 	c-0.8,0-1.5,0.7-1.5,1.5s0.7,1.5,1.5,1.5s1.5-0.7,1.5-1.5S13.3,13,12.5,13L12.5,13z M4.5,13C3.7,13,3,13.7,3,14.5S3.7,16,4.5,16
 	S6,15.3,6,14.5S5.3,13,4.5,13L4.5,13z"></path></svg>
-        <span class="u-icon-circle u-palette-1-base u-shopping-cart-count" style="font-size: 0.75rem;"><!--shopping_cart_count-->2<!--/shopping_cart_count--></span>
+        <span class="u-icon-circle u-palette-1-base u-shopping-cart-count" style="font-size: 0.75rem;"><!--shopping_cart_count--><%out.print(foodItemCount + promoCount);%><!--/shopping_cart_count--></span>
     </span>
             </a><!--/shopping_cart-->
           </div>

@@ -36,7 +36,6 @@ public class PromoFoodRepository implements PromoFoodDao{
 
 	/**
 	 * get all promo food 
-	 * @return promo food list
 	 */
 	@Override
 	public List<PromoFood> getAll() {
@@ -46,8 +45,6 @@ public class PromoFoodRepository implements PromoFoodDao{
 
 	/**
 	 * get promo food details by promo food id
-	 * @param id
-	 * @return promo food
 	 */
 	@Override
 	public PromoFood getById(int id) {
@@ -56,9 +53,6 @@ public class PromoFoodRepository implements PromoFoodDao{
 	
 	/**
 	 * get promo food details by promo food id and status
-	 * @param status
-	 * @param id
-	 * @return promo food list
 	 */
 	@SuppressWarnings({ "deprecation", "unchecked" })
 	@Override
@@ -123,9 +117,5 @@ public class PromoFoodRepository implements PromoFoodDao{
 	public void delete(PromoFood promoFood) {
 		hibernateTemplate.delete(promoFood);		
 	}
-
-	
-
-	
 
 }

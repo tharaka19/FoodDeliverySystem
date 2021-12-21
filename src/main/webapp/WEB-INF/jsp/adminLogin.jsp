@@ -81,9 +81,9 @@
 								<form class="custom-validation" action="loginAdmin" method="get">
 									
 									<div class="mb-3">
-										<label class="form-label">Username</label>
+										<label class="form-label">Email</label>
 										<div>
-											<input type="email" class="form-control" required parsley-type="email" placeholder="Email" name="email" id="email"/>
+											<input type="email" class="form-control" required parsley-type="email"  name="email" id="email"/>
 										</div>
 									</div>
 
@@ -93,7 +93,8 @@
 											<input type="password" id="password" class="form-control" required placeholder="" name="password"/>
 										</div>
 									</div>  
-
+									<p style="color:red;">${status}</p>  
+									
 									<div class="mt-3 text-end">
 										<button class="btn btn-primary w-sm waves-effect waves-light" type="submit">Log In</button>
 									</div>

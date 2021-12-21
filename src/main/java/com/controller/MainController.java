@@ -1,4 +1,4 @@
-package com.controller;
+package com.Controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +23,12 @@ public class MainController {
 	@RequestMapping(value="/SignUp",method=RequestMethod.GET)
 	public String signUp() {
 		return "signUp";
+	}
+	
+	//return guest home page
+	@RequestMapping(value="/GuestHome",method=RequestMethod.GET)
+	public String guestHome() {
+		return "guestHome";
 	}
 	
 	//return home page
@@ -73,13 +79,13 @@ public class MainController {
 		return "shoppingCart";		
 	}
 	
-	//return menu page 
+	//return promo menu page 
 	@RequestMapping(value="/PromoMenu",method=RequestMethod.GET)
 	public String promoMenu() {
 		return "promoMenu";		
 	}
 	
-	//return menu page 
+	//return food item menu page 
 	@RequestMapping(value="/FoodItemMenu",method=RequestMethod.GET)
 	public String categoryMenu() {
 		return "foodItemMenu";		
@@ -96,11 +102,47 @@ public class MainController {
 	public String adminSignUp() {
 		return "adminSignUp";		
 	}
-				
+	
 	//return admin dashbord page 
-	@RequestMapping(value="/AdminDashbord",method=RequestMethod.GET)
+	@RequestMapping(value="/AdminDashbord/Index",method=RequestMethod.GET)
+	public String adminDashbordIndex() {
+		return "adminDashbordIndex";		
+	}
+	
+	//return admin dashbord page 
+	@RequestMapping(value="/AdminDashbord/Home",method=RequestMethod.GET)
 	public String adminDashbord() {
 		return "adminDashbord";		
+	}
+	
+	//return profile page 
+	@RequestMapping(value="/AdminDashbord/Profile",method=RequestMethod.GET)
+	public String profile() {
+		return "profile";		
+	}
+	
+	//return customer page 
+	@RequestMapping(value="/AdminDashbord/Customer",method=RequestMethod.GET)
+	public String customer() {
+		return "customer";		
+	}
+	
+	//return order page 
+	@RequestMapping(value="/AdminDashbord/Order",method=RequestMethod.GET)
+	public String order() {
+		return "order";		
+	}
+	
+	//return payment page 
+	@RequestMapping(value="/AdminDashbord/Payment",method=RequestMethod.GET)
+	public String payment() {
+		return "payment";		
+	}
+	
+	//return income page 
+	@RequestMapping(value="/AdminDashbord/Income",method=RequestMethod.GET)
+	public String income() {
+		return "income";		
 	}
 	
 	//return category page 
@@ -125,6 +167,18 @@ public class MainController {
 	@RequestMapping(value="/AdminDashbord/PromoFood",method=RequestMethod.GET)
 	public String promoFood() {
 		return "promoFood";		
+	}
+	
+	//return delivery location page 
+	@RequestMapping(value="/AdminDashbord/DeliveryLocation",method=RequestMethod.GET)
+	public String deliveryLocation() {
+		return "deliveryLocation";		
+	}
+	
+	//return message page 
+	@RequestMapping(value="/AdminDashbord/Email",method=RequestMethod.GET)
+	public String message() {
+		return "message";		
 	}
 
 }

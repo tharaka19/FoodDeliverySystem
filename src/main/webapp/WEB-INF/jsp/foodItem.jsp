@@ -23,12 +23,17 @@
 	<link rel="stylesheet" id="bootstrap-style" href="<spring:url value="/resources/libs/select2/css/select2.min.css"/> ">
 	<!-- dropzone css -->
 	<link rel="stylesheet" id="bootstrap-style" href="<spring:url value="/resources/libs/dropzone/min/dropzone.min.css"/> ">
+	<!-- Sweet Alert-->
+	<link rel="stylesheet" id="bootstrap-style" href="<spring:url value="/resources/libs/sweetalert2/sweetalert2.min.css"/> ">
 	<!-- Bootstrap Css -->
 	<link rel="stylesheet" id="bootstrap-style" href="<spring:url value="/resources/css/bootstrap.min.css"/> ">
 	<!-- Icons Css -->
 	<link rel="stylesheet" href="<spring:url value="/resources/css/icons.min.css"/> ">
 	<!-- App Css-->
 	<link rel="stylesheet" id="app-style" href="<spring:url value="/resources/css/app.min.css"/> ">
+	
+	<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	
 	
 	<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -38,6 +43,7 @@
 
 	$(document).ready(function() {
 		getAllFoodItem();
+		var imageVal;
 	});
 
 	function addNewFoodItemBtn(){
@@ -46,6 +52,8 @@
 		$('#saveFoodItemBtn').show();
 		$('#updateFoodItemBtn').hide();
 		$('#idfield').hide();
+		$('#imageField').show();
+		$('#updateImageField').hide();
 	}
 
 	function getActiveCategory(name,id) {
@@ -98,9 +106,17 @@
 				getAllFoodItem()
 			},
 			error : function(err) {
-				alert("error is" + err)
+
 			}
 		}); 
+
+		Swal.fire({
+			  position: 'top-end',
+			  icon: 'success',
+			  title: 'Your work has been saved',
+			  showConfirmButton: false,
+			  timer: 3000
+			}) 
 		
 		}	
 	}
@@ -123,8 +139,9 @@
 										.append(
 												'<tr class="tr">'
 												        + '<td>' + data[i].id + '</td>'
+												        + '<td>' + data[i].category.name + '</td>'
 												        + '<td>' + data[i].name + '</td>'
-												        + '<td>' + data[i].price + '</td>'
+												        + '<td>Rs ' + data[i].price + '.00</td>'
 												        + '<td>' + data[i].quantity + '</td>'
 												        + '<td>' + data[i].description + '</td>'
 												        + '<td>  <img src="<spring:url value="/resources/siteImage/' + data[i].image + '"/>" width="50" height="50"> </td>'
@@ -135,22 +152,23 @@
 												        + '</tr>');
 
 										$("#infoTable")
-											.append(
-												'<tr>'
-												+ '<td>' + data[i].name + '</td>'
-												+ '<td>' + data[i].description + '</td>'
-												+ '<td>' + data[i].price + '</td>'
-												+ '<td>' + data[i].quantity + '</td>'
-												+ '</tr>');
-									
+										.append(
+											'<tr>'
+											+ '<td>' + data[i].name + '</td>'
+											+ '<td>Rs ' + data[i].price + '.00</td>'
+											+ '<td>' + data[i].quantity + '</td>'
+											+ '<td>' + data[i].description + '</td>'
+											+ '</tr>');
+
 									}else{
 
 										$("#foodItemTable")
 										.append(
 												'<tr class="tr">'
 												        + '<td>' + data[i].id + '</td>'
+												        + '<td>' + data[i].category.name + '</td>'
 												        + '<td>' + data[i].name + '</td>'
-												        + '<td>' + data[i].price + '</td>'
+												        + '<td>Rs ' + data[i].price + '.00</td>'
 												        + '<td>' + data[i].quantity + '</td>'
 												        + '<td>' + data[i].description + '</td>'
 												        + '<td>  <img src="<spring:url value="/resources/siteImage/' + data[i].image + '"/>" width="50" height="50"> </td>'
@@ -166,7 +184,7 @@
 
 							},
 							error : function(err) {
-								alert("error is" + err)
+
 							}
 						});
 	}
@@ -214,25 +232,27 @@
 	}
 	
 	function editFoodItem(id) {
-
+		
 		$('#saveFoodItemBtn').hide();
 		$('#updateFoodItemBtn').show();
 		$('#idfield').show();
+		$('#imageField').hide();
+		$('#updateImageField').show();
 		
 		$.ajax({
 			type : "GET",
 			url : "FoodItem/getOneFoodItem/" + id,
 			dataType : 'json',
 			success : function(response) {
-
+				
 				getActiveCategory(response.category.name,response.category.id),
 				$("#id").val(response.id),
 				$("#name").val(response.name),
 				$('input[name="price"]').val(response.price),
 				$('input[name="quantity"]').val(response.quantity),
-				$("#description").val(response.description),
-				$("#image").val(response.image)
-
+				imageVal = response.image,
+				$("#description").val(response.description)
+				
 			},
 			error : function(err) {
 				alert("error is" + err)
@@ -242,45 +262,128 @@
 
 	function updateFoodItem() {
 
-		if($("#name").val() == "" || $('input[name="price"]').val() == "" || $('input[name="quantity"]').val()  == "" || $("#image").val() == "" || $("#categoryNameList").val() == ""){
-			//alert("faild");
-		}else{
-		
-			 $.ajax({
-				type : "POST",
-				url : "FoodItem/updateFoodItem",
-				data : {
+				  if($("#name").val() == "" || $('input[name="price"]').val() == "" || $('input[name="quantity"]').val()  == "" || $("#categoryNameList").val() == ""){
+						//alert("faild");
+					}else if($("#updateImage").val() == ""){
 
-					id : $("#id").val(),
-					name : $("#name").val(),
-					price : $('input[name="price"]').val(),
-					quantity : $('input[name="quantity"]').val(),
-					description : $("#description").val(),
-					image : $("#image").val(),
-					categoryId : $("#categoryNameList").val()
-					
-				},
-				success : function(result) {
-					getAllFoodItem()
-				},
-				error : function(err) {
-					alert("error is" + err)
-				}
-			});	
-		}
+						Swal.fire({
+							  title: 'Are you sure?',
+							  text: "You won't be able to revert this!",
+							  icon: 'warning',
+							  showCancelButton: true,
+							  confirmButtonColor: '#3085d6',
+							  cancelButtonColor: '#d33',
+							  confirmButtonText: 'Yes, update it!'
+							}).then((result) => {
+							  if (result.isConfirmed) {
+
+								  $.ajax({
+										type : "POST",
+										url : "FoodItem/updateFoodItem",
+										data : {
+
+											id : $("#id").val(),
+											name : $("#name").val(),
+											price : $('input[name="price"]').val(),
+											quantity : $('input[name="quantity"]').val(),
+											description : $("#description").val(),
+											image : imageVal,
+											categoryId : $("#categoryNameList").val()
+											
+										},
+										success : function(result) {
+											getAllFoodItem(),
+											document.location.reload(true)
+										},
+										error : function(err) {
+											alert("error is" + err)
+										}
+									});
+								  
+							    Swal.fire(
+							      'Updated!',
+							      'Your file has been updated.',
+							      'success'
+							    )
+							  }
+							})
+						
+					}else if($("#updateImage").val() != ""){
+
+						Swal.fire({
+							  title: 'Are you sure?',
+							  text: "You won't be able to revert this!",
+							  icon: 'warning',
+							  showCancelButton: true,
+							  confirmButtonColor: '#3085d6',
+							  cancelButtonColor: '#d33',
+							  confirmButtonText: 'Yes, update it!'
+							}).then((result) => {
+							  if (result.isConfirmed) {
+
+								  $.ajax({
+										type : "POST",
+										url : "FoodItem/updateFoodItem",
+										data : {
+
+											id : $("#id").val(),
+											name : $("#name").val(),
+											price : $('input[name="price"]').val(),
+											quantity : $('input[name="quantity"]').val(),
+											description : $("#description").val(),
+											image : $("#updateImage").val(),
+											categoryId : $("#categoryNameList").val()
+											
+										},
+										success : function(result) {
+											getAllFoodItem(),
+											document.location.reload(true)
+										},
+										error : function(err) {
+											alert("error is" + err)
+										}
+									});	
+								  
+							    Swal.fire(
+							      'Updated!',
+							      'Your file has been updated.',
+							      'success'
+							    )
+							  }
+							})
+					}
 	}
 
 	function deleteFoodItem(id) {
-		
-		$.ajax({
-			url : "FoodItem/deleteFoodItem/" + id,
-			success : function(response) {
-				getAllFoodItem()
-			},
-			error : function(err) {
-				alert("error is" + err)
-			}
-		});
+
+		Swal.fire({
+			  title: 'Are you sure?',
+			  text: "You won't be able to revert this!",
+			  icon: 'warning',
+			  showCancelButton: true,
+			  confirmButtonColor: '#3085d6',
+			  cancelButtonColor: '#d33',
+			  confirmButtonText: 'Yes, delete it!'
+			}).then((result) => {
+			  if (result.isConfirmed) {
+
+				  $.ajax({
+						url : "FoodItem/deleteFoodItem/" + id,
+						success : function(response) {
+							getAllFoodItem()
+						},
+						error : function(err) {
+							alert("error is" + err)
+						}
+					});
+				  
+			    Swal.fire(
+			      'Deleted!',
+			      'Your file has been deleted.',
+			      'success'
+			    )
+			  }
+			})
 	}
 
 	function clickBTN(id) {
@@ -341,52 +444,17 @@
 							<input type="text" class="form-control" placeholder="Search..."> <span class="uil-search"></span> </div>
 					</form>
 				</div>
+				
 				<div class="d-flex">
-					<div class="dropdown d-inline-block d-lg-none ms-2">
-						<button type="button" class="btn header-item noti-icon waves-effect" id="page-header-search-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="uil-search"></i> </button>
-						<div class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0" aria-labelledby="page-header-search-dropdown">
-							<form class="p-3">
-								<div class="m-0">
-									<div class="input-group">
-										<input type="text" class="form-control" placeholder="Search ..." aria-label="Recipient's username">
-										<div class="input-group-append">
-											<button class="btn btn-primary" type="submit"><i class="mdi mdi-magnify"></i></button>
-										</div>
-									</div>
-								</div>
-							</form>
-						</div>
-					</div>
 					
-					<div class="dropdown d-none d-lg-inline-block ms-1">
-						<button type="button" class="btn header-item noti-icon waves-effect" data-bs-toggle="fullscreen"> <i class="uil-minus-path"></i> </button>
-					</div>
-					<div class="dropdown d-inline-block">
-						<button type="button" class="btn header-item noti-icon waves-effect" id="page-header-notifications-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="uil-bell"></i> <span class="badge bg-danger rounded-pill">3</span> </button>
-						<div class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0" aria-labelledby="page-header-notifications-dropdown">
-							<div class="p-3">
-								<div class="row align-items-center">
-									<div class="col">
-										<h5 class="m-0 font-size-16"> Notifications </h5> </div>
-									<div class="col-auto"> <a href="#!" class="small"> Mark all as read</a> </div>
-								</div>
-							</div>
-							<div data-simplebar style="max-height: 230px;">
-								
-								
-							</div>
-							<div class="p-2 border-top">
-								<div class="d-grid">
-									<a class="btn btn-sm btn-link font-size-14 text-center" href="javascript:void(0)"> <i class="uil-arrow-circle-right me-1"></i> View More.. </a>
-								</div>
-							</div>
-						</div>
-					</div>
 					
 					<div class="dropdown d-inline-block">
-						<button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <img class="rounded-circle header-profile-user" src="assets/images/users/avatar-4.jpg" alt="Header Avatar"> <span class="d-none d-xl-inline-block ms-1 fw-medium font-size-15"><% out.print(name);%></span> <i class="uil-angle-down d-none d-xl-inline-block font-size-15"></i> </button>
+						<a href="./Profile"><button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <img class="rounded-circle header-profile-user" src="<spring:url value="/resources/images/xxxmin.jpg"/>" alt="Header Avatar"> <span class="d-none d-xl-inline-block ms-1 fw-medium font-size-15"><% out.print(name);%></span> <i class="uil-angle-down d-none d-xl-inline-block font-size-15"></i> </button></a>
 						<div class="dropdown-menu dropdown-menu-end">
 							<!-- item--><a class="dropdown-item" href="#"><i class="uil uil-user-circle font-size-18 align-middle text-muted me-1"></i> <span class="align-middle">View Profile</span></a> <a class="dropdown-item" href="#"><i class="uil uil-wallet font-size-18 align-middle me-1 text-muted"></i> <span class="align-middle">My Wallet</span></a> <a class="dropdown-item d-block" href="#"><i class="uil uil-cog font-size-18 align-middle me-1 text-muted"></i> <span class="align-middle">Settings</span> <span class="badge bg-soft-success rounded-pill mt-1 ms-2">03</span></a> <a class="dropdown-item" href="#"><i class="uil uil-lock-alt font-size-18 align-middle me-1 text-muted"></i> <span class="align-middle">Lock screen</span></a> <a class="dropdown-item" href="#"><i class="uil uil-sign-out-alt font-size-18 align-middle me-1 text-muted"></i> <span class="align-middle">Sign out</span></a> </div>
+					</div>
+					<div class="dropdown d-inline-block">
+						<button type="button" class="btn header-item noti-icon right-bar-toggle waves-effect"> <i class="uil-cog"></i> </button>
 					</div>
 				</div>
 			</div>
@@ -394,18 +462,7 @@
 		<!-- ========== Left Sidebar Start ========== -->
 		<div class="vertical-menu">
 			<!-- LOGO -->
-			<div class="navbar-brand-box">
-				<a href="index.html" class="logo logo-dark"> <span class="logo-sm">
-                            <img src="assets/images/logo-sm.png" alt="" height="22">
-                        </span> <span class="logo-lg">
-                            <img src="assets/images/logo-dark.png" alt="" height="20">
-                        </span> </a>
-				<a href="index.html" class="logo logo-light"> <span class="logo-sm">
-                            <img src="assets/images/logo-sm.png" alt="" height="22">
-                        </span> <span class="logo-lg">
-                            <img src="assets/images/logo-light.png" alt="" height="20">
-                        </span> </a>
-			</div>
+			
 			<button type="button" class="btn btn-sm px-3 font-size-16 header-item waves-effect vertical-menu-btn"> <i class="fa fa-fw fa-bars"></i> </button>
 			<div data-simplebar class="sidebar-menu-scroll">
 				<!--- Sidemenu -->
@@ -414,47 +471,37 @@
 					<ul class="metismenu list-unstyled" id="side-menu">
 						<li class="menu-title">Menu</li>
 						<li>
-							<a href="./AdminDashbord"> <i class="uil-home-alt"></i><span class="badge rounded-pill bg-primary float-end">01</span> <span>Dashboard</span> </a>
+							<a href="./Home"> <i class="uil-home-alt"></i><span class="badge rounded-pill bg-primary float-end">01</span> <span>Dashboard</span> </a>
 						</li>
-						<li>
-							<a href="javascript: void(0);" class="has-arrow waves-effect"> <i class="uil-window-section"></i> <span>Layouts</span> </a>
-							<ul class="sub-menu" aria-expanded="true">
-								
-										<li><a href="layouts-dark-sidebar.html">Dark Sidebar</a></li>
-										<li><a href="layouts-colored-sidebar.html">Colored Sidebar</a></li>
-										
-							</ul>
-						</li>
+				
 						<li class="menu-title">Apps</li>
+					
 						<li>
-							<a href="calendar.html" class="waves-effect"> <i class="uil-calender"></i> <span>Calendar</span> </a>
+							<a href="./Customer" class="waves-effect"> <i class="uil-calender"></i> <span>Customers</span> </a>
+						</li>
+						<li>
+							<a href="./Order" class="waves-effect"> <i class="uil-calender"></i> <span>Orders</span> </a>
+						</li>
+						<li>
+							<a href="./Payment" class="waves-effect"> <i class="uil-calender"></i> <span>Payment</span> </a>
+						</li>
+						<li>
+							<a href="./Income" class="waves-effect"> <i class="uil-calender"></i> <span>Income</span> </a>
+						</li>
+						<li>
+							<a href="./Email" class="waves-effect"> <i class="uil-calender"></i> <span>Email</span> </a>
 						</li>
 						<li>
 							<a href="javascript: void(0);" class="has-arrow waves-effect"> <i class="uil-store"></i> <span>Ecommerce</span> </a>
 							<ul class="sub-menu" aria-expanded="false">
-								<li><a href="ecommerce-orders.html">Orders</a></li>
-								<li><a href="ecommerce-customers.html">Customers</a></li>
 								<li><a href="./Category">Category</a></li>
 								<li><a href="./FoodItem">Food Items</a></li>
 								<li><a href="./Promo">Promo</a></li>
 								<li><a href="./PromoFood">Promo Food</a></li>
+								<li><a href="./DeliveryLocation">Delivery Location</a></li>
 							</ul>
 						</li>
-						<li>
-							<a href="javascript: void(0);" class="has-arrow waves-effect"> <i class="uil-invoice"></i> <span>Invoices</span> </a>
-							<ul class="sub-menu" aria-expanded="false">
-								<li><a href="invoices-list.html">Invoice List</a></li>
-								<li><a href="invoices-detail.html">Invoice Detail</a></li>
-							</ul>
-						</li>
-						<li>
-							<a href="javascript: void(0);" class="has-arrow waves-effect"> <i class="uil-book-alt"></i> <span>Contacts</span> </a>
-							<ul class="sub-menu" aria-expanded="false">
-								<li><a href="contacts-grid.html">User Grid</a></li>
-								<li><a href="contacts-list.html">User List</a></li>
-								<li><a href="contacts-profile.html">Profile</a></li>
-							</ul>
-						</li>
+				
 						
 					
 					</ul>
@@ -522,7 +569,8 @@
                                         <table id="datatable" class="table table-bordered dt-responsive nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                                             <thead>
 					                            <tr>
-													<th scope="col">ID</th>
+													<th scope="col">#FI_ID</th>
+													<th scope="col">Category Name</th>
 													<th scope="col">Name</th>
 													<th scope="col">Price</th>
 													<th scope="col">Quantity</th>
@@ -570,7 +618,7 @@
 															<div class="col"></div>
 															<div class="col">
 															<div class="mb-3">
-																	<label for="id">ID</label>
+																	<label for="id">#FI_ID</label>
 																	<input type="text" readonly="readonly" class="form-control" id="id" name="id">
 																</div>
 															</div>
@@ -652,7 +700,7 @@
 															<div class="col"></div>
 														</div> 
 														
-														<div class="row">
+														<div class="row" id="imageField">
 														    <div class="col"></div>
 															<div class="col">
 																<div class="mb-3">
@@ -661,6 +709,17 @@
 																	<div class="invalid-feedback">
 																		Please provide a valid image.
 																	</div>
+																</div>
+															</div>
+															<div class="col"></div>
+														</div>
+														
+														<div class="row" id="updateImageField">
+														    <div class="col"></div>
+															<div class="col">
+																<div class="mb-3">
+																	<label class="form-label" for="validationCustom03">Image</label><br>
+																	 <input type="file" class="form-control" accept="image/*"  name="updateImage" id="updateImage">
 																</div>
 															</div>
 															<div class="col"></div>
@@ -721,7 +780,7 @@
 													</div>
 												</div>
 												<div class="flex-grow-1 overflow-hidden">
-													<h5 class="font-size-16 mb-1">Category Info</h5>
+													<h5 class="font-size-16 mb-1">Food Item Info</h5>
 
 												</div>
 												<div class="flex-shrink-0"> <i class="mdi mdi-chevron-up accor-down-icon font-size-24"></i> </div>
@@ -736,15 +795,14 @@
                                             <thead>
                                             <tr>
                                                 <th>Name</th>
-                                                <th>Description</th>
                                                 <th>Price</th>
                                                 <th>Quantity</th>
+                                                <th>Description</th>
+                                             
                                             </tr>
                                             </thead>
-        
-        
+       
                                             <tbody id="infoTable">
-                                           
                                             
                                             </tbody>
                                         </table>
@@ -838,6 +896,12 @@
 	<!-- Table Editable plugin -->
 	<script type="text/javascript" src="<spring:url value="/resources/libs/table-edits/build/table-edits.min.js"/>"></script>
 	<script type="text/javascript" src="<spring:url value="/resources/js/pages/table-editable.int.js"/>"></script>
+	
+	<!-- Sweet Alerts js -->
+     <script type="text/javascript" src="<spring:url value="/resources/libs/sweetalert2/sweetalert2.min.js"/>"></script>
+
+    <!-- Sweet alert init js-->
+    <script type="text/javascript" src="<spring:url value="/resources/js/pages/sweet-alerts.init.js"/>"></script>
   
 	<!-- App js -->
 	<script type="text/javascript" src="<spring:url value="/resources/js/app.js"/>"></script>

@@ -12,6 +12,8 @@ import com.Service.Bd.CustomerBd;
 @Service("customerBd")
 public class CustomerService implements CustomerBd {
 	
+	private Customer customer;
+	
 	@Autowired
 	private CustomerDao customerRepository;
 
@@ -28,7 +30,23 @@ public class CustomerService implements CustomerBd {
 	 */
 	@Override
 	public boolean checkEmail(String email) {
-		return customerRepository.checkEmail(email);
+		if(customerRepository.checkEmail(email) > 0) {
+			return true;
+		}else {
+			return false;
+		}
+	}
+	
+	/**
+	 * check existing password
+	 */
+	@Override
+	public boolean checkPassword(String currentPassword, int id) {
+		if(customerRepository.checkPassword(currentPassword, id) > 0) {
+			return true;
+		}else {
+			return false;
+		}
 	}
 	
 	/**
@@ -44,9 +62,21 @@ public class CustomerService implements CustomerBd {
 	 */
 	@Override
 	public boolean login(Customer customer) {
-		return customerRepository.login(customer);
+		if(customerRepository.login(customer) > 0 ) {
+			return true;
+		}else {
+			return false;
+		}
 	}
 
+	/**
+	 * get all customer details
+	 */
+	@Override
+	public List<Customer> getAllCustomer() {
+		return customerRepository.getAllCustomer();
+	}
+	
 	/**
 	 * get customer details by customer id
 	 */
@@ -61,12 +91,35 @@ public class CustomerService implements CustomerBd {
 	@Override
 	public Customer getByEmail(String email) {
 		List<Customer> CustomerList = customerRepository.getByEmail(email);
-		for(Customer customer : CustomerList) {
-			System.out.println(customer.getFirstName());
-			return customer;
+		
+		if(CustomerList.size() > 0) {
+			return CustomerList.get(0);
+		}else {
+			return null;
 		}
-		return null;
+	}
+	
+	/**
+	 * update password by customer id
+	 */
+	@Override
+	public void updatePassword(String password, int id) {
+		customer = new Customer();
+		
+		//get customer details by customer id
+		customer = customerRepository.getById(id);
+		
+		//set customer password
+		customer.setPassword(password);
+		
+		customerRepository.update(customer);
 	}
 
-
+	/**
+	 * delete customer item details by customer id
+	 */
+	@Override
+	public void delete(int id) {
+		customerRepository.delete(customerRepository.getById(id));
+	}
 }

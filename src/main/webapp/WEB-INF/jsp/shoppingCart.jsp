@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-    pageEncoding="ISO-8859-1" import= "com.Entity.ShoppingCart" import="java.util.List"%>
+    pageEncoding="ISO-8859-1" import= "com.Entity.ShoppingCart" import= "com.Entity.Customer" import="java.util.List"%>
 <%@taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>     
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>   
@@ -37,6 +37,29 @@
 	<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" rel="stylesheet">
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.bundle.min.js"></script>
+	
+	
+	<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	
+	<script
+		src="https://www.paypal.com/sdk/js?client-id=AeiAmTiCBkeao2sUSoKcFSzXKR9FIMFGnAnIEwVksUC7EVhkDG8_guoASQdFQ-u0AYBLBSx61JOuURgM">
+	</script>
+	
+
+
+
+
+
+							
+							
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Ensures optimal rendering on mobile devices. -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<!-- Optimal Internet Explorer compatibility -->
+
+
     
     
     <script type="application/ld+json">{
@@ -57,17 +80,390 @@
     <meta property="og:title" content="Shoping Cart">
     <meta property="og:description" content="">
     <meta property="og:type" content="website">
+
+
+ 	<%
+		Customer customer = null;
+        if(session.getAttribute("customer") == null) {
+
+     	}else{
+     		customer = (Customer) session.getAttribute("customer");
+     	}
+		
+	%>
+		
+		
+		
+	<% 
+        float foodItemSubTotal = 0;
+        int foodItemCount = 0;
+     	if(session.getAttribute("foodItemCart") == null) {
+
+     	}else{
+     		 List<ShoppingCart> foodItemCartList = (List<ShoppingCart>) session.getAttribute("foodItemCart");
+        
+             for(int a = 0; a < foodItemCartList.size(); a++){
+            	 foodItemSubTotal = foodItemSubTotal + foodItemCartList.get(a).getFoodItemTotal();
+            	 foodItemCount = foodItemCount + 1;
+             }
+     	}
+     %>
+     
+     <% 
+        float promoSubTotal = 0;
+     	float totalDiscount = 0;
+     	int promoCount = 0;
+     	if(session.getAttribute("promoCart") == null) {
+
+     	}else{
+     		 List<ShoppingCart> promoCartList = (List<ShoppingCart>) session.getAttribute("promoCart");
+        
+             for(int a = 0; a < promoCartList.size(); a++){
+            	 promoSubTotal = promoSubTotal + promoCartList.get(a).getPromoTotal();
+            	 totalDiscount = totalDiscount + promoCartList.get(a).getPromoTotalDiscount();
+            	 promoCount = promoCount +1;
+             }
+     	}
+     %>
+     
+     <% 
+	     float deliveryFee = 0;
+	     if(foodItemCount == 0 && promoCount== 0){
+	    	 
+	     }else{
+	    	 if(session.getAttribute("deliveryFee") == null){
+	 	    	
+		     }else{
+		    	 deliveryFee = (float) session.getAttribute("deliveryFee");
+		     }
+	     }  
+     %>
+         
     
 <script>
-$(document).ready(function() {
+	$(document).ready(function() {
+		$('#idField').hide();
+		getAllShippingDetails();
 
-});
+		var houseNoOrLane;
+		var streetName;
+		var city;
+		var shippingID;
+	});
+
+	function calculateFoodQuantity(action, id){
+
+		$.ajax({
+				type : "POST",
+				url : "ShoppingCart/calculateFoodQuantity",
+				data : {
+					
+					action : action,
+					id : id
+		                
+				},
+				success : function(response) {
+					document.location.reload(true)
+				},
+				error : function(err) {
+					alert("error is" + err)
+				}
+			});
+		
+	}
+	
+	function deleteFoodItem(id){
+
+		$.ajax({
+			url : "ShoppingCart/deleteFoodItem/" + id,
+			success : function(response) {
+				document.location.reload(true)
+			},
+			error : function(err) {
+				alert("error is" + err)
+			}
+		});
+	}
+
+	function clearFoodItem(){
+
+		$.ajax({
+			type : "GET",
+			url : "ShoppingCart/clearFoodItem",
+			success : function(response) {
+				document.location.reload(true)
+			},
+			error : function(err) {
+				alert("error is" + err)
+			}
+		});
+	}
+
+	function calculatePromoQuantity(action, id){
+
+		$.ajax({
+				type : "POST",
+				url : "ShoppingCart/calculatePromoQuantity",
+				data : {
+					
+					action : action,
+					id : id
+		                
+				},
+				success : function(response) {
+					document.location.reload(true)
+				},
+				error : function(err) {
+					alert("error is" + err)
+				}
+			});
+		
+	}
+	
+	function deletePromo(id){
+
+		$.ajax({
+			url : "ShoppingCart/deletePromo/" + id,
+			success : function(response) {
+				document.location.reload(true)
+			},
+			error : function(err) {
+				alert("error is" + err)
+			}
+		});
+	}
+
+	
+	function clearPromo(){
+
+		$.ajax({
+			type : "GET",
+			url : "ShoppingCart/clearPromo",
+			success : function(response) {
+				document.location.reload(true)
+			},
+			error : function(err) {
+				alert("error is" + err)
+			}
+		});
+	}
+		
+	function getAllShippingDetails() { 
+		
+		var data = "";
+				$.ajax({
+						type : "POST",
+						url : "ShoppingCart/getAllShippingDetails",
+						data : {
+							
+							id : $("#customerId").val(),
+				                
+						},
+						success : function(response) {
+							 data = response
+							 
+								$('.tr').remove();
+								for (i = 0; i < data.length; i++) {
+	
+									if(data[i].status == "On"){
+										
+										houseNoOrLane = data[i].houseNoOrLane ;
+										streetName = data[i].streetName;
+										city = data[i].city;
+										
+										getDeliveryLocationFee(data[i].city);
+										
+										$("#addressTable")
+										.append(
+												'<div class="col-lg-4 col-sm-6">'
+												+ '<div class="card border rounded active shipping-address">'
+												+ '<div class="card-body">'
+												+ '<h5 class="font-size-14 mb-4">Address 1</h5>'
+												+ '<h5 class="font-size-14">' + data[i].fullName + '</h5>'
+												+ '<p class="mb-1">' + data[i].houseNoOrLane + ',<br>'+ data[i].streetName + ',<br>' + data[i].city + '</p>'
+												+ '<p class="mb-0">Mo. 012-345-6789</p><br>'
+												+ '<div class="square-switch">'
+												+ '<div id="activeLable" class="badge bg-pill bg-soft-success font-size-12">'+ data[i].status +'</div>'
+												+ '<input type="button" id="deactiveBtn" class="btn btn-outline-info waves-effect waves-light" onclick="offShippingDetailsStatus('+ data[i].id + ')" value="Off"></input>'
+												+ '</div></div></div></div>');
+									}else{
+										
+										$("#addressTable")
+										.append(
+												'<div class="col-lg-4 col-sm-6">'
+												+ '<div class="card border rounded active shipping-address">'
+												+ '<div class="card-body">'
+												+ '<h5 class="font-size-14 mb-4">Address 1</h5>'
+												+ '<h5 class="font-size-14">' + data[i].fullName + '</h5>'
+												+ '<p class="mb-1">' + data[i].houseNoOrLane + ',<br>'+ data[i].streetName + ',<br>' + data[i].city + '</p>'
+												+ '<p class="mb-0">Mo. 012-345-6789</p><br>'
+												+ '<div class="square-switch">'
+												+ '<div id="deactiveLable" class="badge bg-pill bg-soft-danger font-size-12">'+ data[i].status +'</div>'
+												+ '<input type="button" id="activeBtn" class="btn btn-outline-info waves-effect waves-light" onclick="onShippingDetailsStatus('+ data[i].id + ')" value="On"></input>'
+												+ '</div></div></div></div>');
+									}
+								}
+								
+							},
+							error : function(err) {
+								alert("error is" + err)
+							}
+						});
+	}
+
+	function onShippingDetailsStatus(id) {
+
+		$.ajax({
+			type : "POST",
+			url : "ShoppingCart/updateShoppingDetailsStatus",
+			data : {
+				
+				customerId : $("#customerId").val(),
+                status : "On",
+                id : id,
+                
+			},
+			success : function(result) {	
+				document.location.reload(true),
+				getAllShippingDetails()			
+			},
+			error : function(err) {
+				alert("error is" + err)
+			}
+		});
+			
+	}
+
+	function offShippingDetailsStatus(id) {
+		
+			$.ajax({
+				type : "POST",
+				url : "ShoppingCart/updateShoppingDetailsStatus",
+				data : {
+					
+					customerId : $("#customerId").val(),
+	                status : "Off",
+	                id : id
+	                
+				},
+				success : function(result) {
+					document.location.reload(true),	
+					getAllShippingDetails()			
+				},
+				error : function(err) {
+					alert("error is" + err)
+				}
+			});
+				
+	}
+
+	function getDeliveryLocationFee(city){
+		
+		$.ajax({
+			type : "GET",
+			url : "ShoppingCart/getDeliveryLocationFee/" + city,
+			data : {
+								                                    
+			},
+			success : function(result) {
+				
+			},
+			error : function(err) {
+				alert("error is" + err)
+			}
+		});
+		
+	}
+
+	function getCustomerShippingDetails(){
+
+		$.ajax({
+			type : "POST",
+			url : "MyAccount/getCustomerShippingDetails",
+			data : {
+				
+				customerId : $("#customerId").val(),
+                status : "On"
+                
+			},
+			success : function(response) {	
+				data = response
+
+				shippingID = data.id
+			},
+			error : function(err) {
+				alert("error is" + err)
+			}
+		});
+	}
+	
+	
+	function proccedOrder(paymentStatus){
+		
+		getCustomerShippingDetails();
+		
+		$.ajax({
+			type : "POST",
+			url : "ShoppingCart/proccedOrder",
+			data : {
+
+				itemCount : <% out.print(foodItemCount + promoCount);%>,
+				subTotal : <% out.print(foodItemSubTotal + promoSubTotal);%>,
+				deliveryFee : <% out.print(deliveryFee);%>,
+				totalDiscount : <% out.print(totalDiscount);%>,
+				total : <% out.print((foodItemSubTotal + promoSubTotal + deliveryFee) - totalDiscount );%>,
+				status : "Pending",
+				customerId : $("#customerId").val(),
+				shippingDetailsId : shippingID
+                
+			},
+			success : function(result) {
+				
+				if(result > 0){
+					savePayment(result, paymentStatus)
+				}else{
+					alert("no item")
+				}
+				
+			},
+			error : function(err) {
+				alert("error is" + err)
+			}
+		});
+	}
+
+	
+	
+	function savePayment(orderId, paymentStatus){
+
+		$.ajax({
+			type : "POST",
+			url : "ShoppingCart/savePayment",
+			data : {
+
+				orderId : orderId,
+				paymentMethord : paymentStatus,
+				amount : <% out.print((foodItemSubTotal + promoSubTotal + deliveryFee) - totalDiscount );%>,
+				status : "Pending"
+                
+			},
+			success : function(result) {
+				alert(result)
+			},
+			error : function(err) {
+				alert("error is" + err)
+			}
+		});
+	}
+
+
 
 </script>   
   </head>
   <body class="u-body u-overlap"><header class=" u-clearfix u-header u-section-row-container" id="sec-8947"><div class="u-section-rows" style="margin-bottom: 0px;">
         <div class="u-section-row u-sticky u-sticky-e2a9 u-section-row-1" id="sec-71fa">
           
+        
           
           
           
@@ -148,7 +544,7 @@ $(document).ready(function() {
             <a class="u-shopping-cart u-shopping-cart-1" href="#"><span class="u-icon u-shopping-cart-icon"><svg class="u-svg-link" preserveAspectRatio="xMidYMin slice" viewBox="0 0 16 16" style=""><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-58a1"></use></svg><svg class="u-svg-content" viewBox="0 0 16 16" x="0px" y="0px" id="svg-58a1"><path d="M14.5,3l-2.1,5H6.1L5.9,7.6L4,3H14.5 M0,0v1h2.1L5,8l-2,4h11v-1H4.6l1-2H13l3-7H3.6L2.8,0H0z M12.5,13
 	c-0.8,0-1.5,0.7-1.5,1.5s0.7,1.5,1.5,1.5s1.5-0.7,1.5-1.5S13.3,13,12.5,13L12.5,13z M4.5,13C3.7,13,3,13.7,3,14.5S3.7,16,4.5,16
 	S6,15.3,6,14.5S5.3,13,4.5,13L4.5,13z"></path></svg>
-        <span class="u-icon-circle u-palette-1-base u-shopping-cart-count" style="font-size: 0.75rem;"><!--shopping_cart_count-->2<!--/shopping_cart_count--></span>
+        <span class="u-icon-circle u-palette-1-base u-shopping-cart-count" style="font-size: 0.75rem;"><!--shopping_cart_count--><%out.print(foodItemCount + promoCount);%><!--/shopping_cart_count--></span>
     </span>
             </a><!--/shopping_cart-->
           </div>
@@ -187,39 +583,19 @@ $(document).ready(function() {
       
       <div class="container padding-bottom-3x mb-1">  
     <div class="table-responsive shopping-cart">
-    
-       
-     <% 
-        float foodItemSubTotal = 0;
-        int foodItemCount = 0;
-     	if(session.getAttribute("foodItemCart") == null) {
-
-     	}else{
-     		 List<ShoppingCart> foodItemCartList = (List<ShoppingCart>) session.getAttribute("foodItemCart");
-        
-             for(int a = 0; a < foodItemCartList.size(); a++){
-            	 foodItemSubTotal = foodItemSubTotal + foodItemCartList.get(a).getFoodItemTotal();
-            	 foodItemCount = foodItemCount + 1;
-             }
-     	}
-     %>
-     
-     <% 
-        float promoSubTotal = 0;
-     	float totalDiscount = 0;
-     	int promoCount = 0;
-     	if(session.getAttribute("promoCart") == null) {
-
-     	}else{
-     		 List<ShoppingCart> promoCartList = (List<ShoppingCart>) session.getAttribute("promoCart");
-        
-             for(int a = 0; a < promoCartList.size(); a++){
-            	 promoSubTotal = promoSubTotal + promoCartList.get(a).getPromoTotal();
-            	 totalDiscount = totalDiscount + promoCartList.get(a).getPromoTotalDiscount();
-            	 promoCount = promoCount +1;
-             }
-     	}
-     %>  
+    	
+    													<div class="row" id="idField">
+														  <div class="col"></div>
+															<div class="col">
+																<div class="mb-3">
+																	<label class="form-label">ID</label>
+																	<input type="text" class="form-control" required name="customerId" id="customerId" value="<%out.print(customer.getId());%>"/>
+																</div>
+															</div>
+															<div class="col"></div>
+														</div>
+														
+    		
     				
     	<table class="table">
             <thead>
@@ -228,7 +604,7 @@ $(document).ready(function() {
                     <th class="text-center">Quantity</th>
                     <th class="text-center">Price</th>
 					<th class="text-center">Total</th>
-                    <th class="text-center"><a class="btn btn-sm btn-outline-danger" href="#">Clear Cart</a></th>
+                    <th class="text-center"><a class="btn btn-sm btn-outline-danger" onclick="clearFoodItem()">Clear Cart</a></th>
                 </tr>
             </thead>
             <tbody id="foodItemDetails">
@@ -255,13 +631,13 @@ $(document).ready(function() {
                     
                     	<div class="input-group plus-minus-input">
                     	<div class="input-group-button">
-                    	<button type="button" class="form-control" id="validationCustom04" data-quantity="minus" data-field="quantity">
+                    	<button type="button" class="form-control" id="validationCustom04" data-quantity="minus" data-field="quantity" onclick="calculateFoodQuantity('minus',${it.foodItem.id})">
                     	<i class="fa fa-minus" aria-hidden="true"></i>
                     	</button>
                     	</div>
-                    	<input type="number" class="form-control" required name="quantity" id="quantity" value="${it.foodItemQuantity}">
+                    	<input type="number" class="form-control" required name="quantity" id="quantity" readonly="readonly" value="${it.foodItemQuantity}">
                     	<div class="input-group-button">
-                    	<button type="button" class="form-control" id="validationCustom04" data-quantity="plus" data-field="quantity">
+                    	<button type="button" class="form-control" id="validationCustom04" data-quantity="plus" data-field="quantity" onclick="calculateFoodQuantity('plus',${it.foodItem.id})">
                     	<i class="fa fa-plus" aria-hidden="true"></i>
                     	</button>
                     	</div>
@@ -270,7 +646,7 @@ $(document).ready(function() {
                     </td>
                     <td class="text-center text-lg text-medium">Rs ${it.foodItem.price}</td>
 					<td class="text-center text-lg text-medium">Rs ${it.foodItemTotal}</td>
-                    <td class="text-center"><a class="remove-from-cart" href="#" data-toggle="tooltip" title="" data-original-title="Remove item"><i class="fa fa-trash"></i></a></td>
+                    <td class="text-center"><a class="remove-from-cart" onclick="deleteFoodItem(${it.foodItem.id})" data-toggle="tooltip" title="" data-original-title="Remove item"><i class="fa fa-trash"></i></a></td>
                 </tr>
                
                  </c:forEach>
@@ -286,7 +662,7 @@ $(document).ready(function() {
                     <th class="text-center">Price</th>
                     <th class="text-center">Discount</th>
 					<th class="text-center">Total</th>
-                    <th class="text-center"><a class="btn btn-sm btn-outline-danger" href="#">Clear Cart</a></th>
+                    <th class="text-center"><a class="btn btn-sm btn-outline-danger" onclick="clearPromo()">Clear Cart</a></th>
                 </tr>
             </thead>
             <tbody>
@@ -308,13 +684,13 @@ $(document).ready(function() {
                     
                     	<div class="input-group plus-minus-input">
                     	<div class="input-group-button">
-                    	<button type="button" class="form-control" id="validationCustom04" data-quantity="minus" data-field="quantity">
+                    	<button type="button" class="form-control" id="validationCustom04" data-quantity="minus" data-field="quantity" onclick="calculatePromoQuantity('minus', ${it.promo.id})">
                     	<i class="fa fa-minus" aria-hidden="true"></i>
                     	</button>
                     	</div>
-                    	<input type="number" class="form-control" required name="quantity" id="promoquantity" value="${it.promoQuantity}">
+                    	<input type="number" class="form-control" required name="quantity" id="promoquantity" readonly="readonly" value="${it.promoQuantity}">
                     	<div class="input-group-button">
-                    	<button type="button" class="form-control" id="validationCustom04" data-quantity="plus" data-field="quantity">
+                    	<button type="button" class="form-control" id="validationCustom04" data-quantity="plus" data-field="quantity" onclick="calculatePromoQuantity('plus', ${it.promo.id})">
                     	<i class="fa fa-plus" aria-hidden="true"></i>
                     	</button>
                     	</div>
@@ -323,8 +699,8 @@ $(document).ready(function() {
                     </td>
                     <td class="text-center text-lg text-medium">Rs ${it.promo.price}</td>
                     <td class="text-center text-lg text-medium">Rs ${it.promoTotalDiscount}</td>
-					<td class="text-center text-lg text-medium" id="promoTotal">Rs ${it.promoTotal}</td>
-                    <td class="text-center"><a class="remove-from-cart" href="#" data-toggle="tooltip" title="" data-original-title="Remove item"><i class="fa fa-trash"></i></a></td>
+					<td class="text-center text-lg text-medium" id="promoTotal">Rs ${it.promoTotal -it.promoTotalDiscount }</td>
+                    <td class="text-center"><a class="remove-from-cart" onclick="deletePromo(${it.promo.id})" data-toggle="tooltip" title="" data-original-title="Remove item"><i class="fa fa-trash"></i></a></td>
                 </tr>
                
                  </c:forEach>
@@ -336,25 +712,26 @@ $(document).ready(function() {
         
     </div>
     <div class="shopping-cart-footer">
-        <div class="column">
-            <form class="coupon-form" method="post">
-                <input class="form-control form-control-sm" type="text" placeholder="Coupon code" required="">
-                <button class="btn btn-outline-primary btn-sm" type="submit">Apply Coupon</button>
-            </form>
-        </div>
+    &nbsp;
 		<div class="column text-lg">Item Count: <span class="text-medium"><% out.print(foodItemCount + promoCount);%></span></div><br>
         <div class="column text-lg">Subtotal: <span class="text-medium">Rs <% out.print(foodItemSubTotal + promoSubTotal);%></span></div><br>
-		<div class="column text-lg">Delivery Charges: <span class="text-medium">Rs ___</span></div><br>
+		<div class="column text-lg">Delivery Charges: <span class="text-medium">Rs <% out.print(deliveryFee);%></span></div><br>
 		<div class="column text-lg">Total Discounts: <span class="text-medium">Rs <% out.print(totalDiscount);%></span></div><br>
     </div>
 	
 	 <h2 class="h6 px-4 py-3 bg-secondary text-center">Total</h2>
-     <div class="h3 font-weight-semibold text-center py-3">Rs ___</div>
+     <div class="h3 font-weight-semibold text-center py-3">Rs <% out.print((foodItemSubTotal + promoSubTotal + deliveryFee) - totalDiscount );%></div>
 	
     <div class="shopping-cart-footer">
-        <div class="column"><a class="btn btn-outline-secondary" href="#"><i class="icon-arrow-left"></i>&nbsp;Back to Shopping</a></div>
-        <div class="column"><a class="btn btn-primary" href="#" data-toast="" data-toast-type="success" data-toast-position="topRight" data-toast-icon="icon-circle-check" data-toast-title="Your cart" data-toast-message="is updated successfully!">Update Cart</a><a class="btn btn-success" href="#" data-toggle="modal" data-target="#cart">Checkout</a></div>
+        <div class="column"><a class="btn btn-outline-secondary" href="./Menu"><i class="icon-arrow-left"></i>&nbsp;Back to Shopping</a></div>
+        <div class="column"><a class="btn btn-success" href="#" data-toggle="modal" data-target="#cart">Checkout</a></div>
     </div>
+    
+    <!------------------------ PAYPAL BUTTON -------------------------->
+
+							
+    
+    
 </div>
 
 
@@ -372,7 +749,7 @@ $(document).ready(function() {
 							    <div class="modal-content">
 							      <div class="modal-header">
 							        <h5 class="modal-title" id="exampleModalLabel">Cart</h5>
-							        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="document.location.reload(true)">
+							        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="location.reload();">
 							          <span aria-hidden="true">&times;</span>
 							        </button>
 							      </div>
@@ -386,160 +763,30 @@ $(document).ready(function() {
                                        
                                         <div id="basic-example">
                                             <!-- Seller Details -->
-                                            <h3>Seller Details</h3>
-                                            <section>
-                                                <form>
-                                                    <div class="row">
-                                                        <div class="col-lg-6">
-                                                            <div class="mb-3">
-                                                                <label for="basicpill-firstname-input">First name</label>
-                                                                <input type="text" class="form-control" id="basicpill-firstname-input">
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-6">
-                                                            <div class="mb-3">
-                                                                <label for="basicpill-lastname-input">Last name</label>
-                                                                <input type="text" class="form-control" id="basicpill-lastname-input">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="row">
-                                                        <div class="col-lg-6">
-                                                            <div class="mb-3">
-                                                                <label for="basicpill-phoneno-input">Phone</label>
-                                                                <input type="text" class="form-control" id="basicpill-phoneno-input">
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-6">
-                                                            <div class="mb-3">
-                                                                <label for="basicpill-email-input">Email</label>
-                                                                <input type="email" class="form-control" id="basicpill-email-input">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-lg-12">
-                                                            <div class="mb-3">
-                                                                <label for="basicpill-address-input">Address</label>
-                                                                <textarea id="basicpill-address-input" class="form-control" rows="2"></textarea>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </form>
-                                            </section>
+                                            <h3>Online Payment</h3>
+                                            <div id="paypal-button-container" onclick="display()"></div>
+                                            
 
                                             <!-- Company Document -->
-                                            <h3>Company Document</h3>
+                                            <h3>Cash On Delivery</h3>
                                             <section>
-                                                <div class="row">
-												<div class="col-lg-4 col-sm-6">
-													<div class="card border rounded active shipping-address">
-														<div class="card-body">
-															<a href="#" class="float-end ms-1" data-bs-toggle="tooltip" data-placement="top" title="Edit"> <i class="uil uil-pen font-size-16"></i> </a>
-															<h5 class="font-size-14 mb-4">Address 1</h5>
-															<h5 class="font-size-14">James Morgan</h5>
-															<p class="mb-1">1557 Sundown Lane Smithville, TX 78957</p>
-															<p class="mb-0">Mo. 012-345-6789</p><br>
-															<div class="square-switch">
-																<input type="checkbox" id="square-switch1" switch="none" />
-																<label for="square-switch1" data-on-label="On" data-off-label="Off"></label>
-                                                            </div>
-														</div>
+                                               <div class="row" id="addressTable">
+												
+												
+										       </div>
+                                            </section>
+                                            
+                                            <div class="row">
+														    <div class="col"></div>
+															<div class="col"></div>
+															<div class="col">
+																<div class="mt-3 text-end">
+																	<button class="btn btn-success" type="submit" id="proccedBtn" onclick="proccedOrder('Cash on delivery')">Procced</button>
+																</div>
+															</div>
 													</div>
-												</div>
-												<div class="col-lg-4 col-sm-6">
-													<div class="card border rounded active shipping-address">
-														<div class="card-body">
-															<a href="#" class="float-end ms-1" data-bs-toggle="tooltip" data-placement="top" title="Edit"> <i class="uil uil-pen font-size-16"></i> </a>
-															<h5 class="font-size-14 mb-4">Address 1</h5>
-															<h5 class="font-size-14">James Morgan</h5>
-															<p class="mb-1">1557 Sundown Lane Smithville, TX 78957</p>
-															<p class="mb-0">Mo. 012-345-6789</p><br>
-															<div class="square-switch">
-																<input type="checkbox" id="square-switch2" switch="none" />
-																<label for="square-switch2" data-on-label="On" data-off-label="Off"></label>
-                                                            </div>
-															
-														</div>
-													</div>
-													
-												</div>
-											</div>
-                                            </section>
 
-                                            <!-- Bank Details -->
-                                            <h3>Bank Details</h3>
-                                            <section>
-                                                <div>
-                                                    <form>
-                                                        <div class="row">
-                                                            <div class="col-lg-6">
-                                                                <div class="mb-3">
-                                                                    <label for="basicpill-namecard-input">Name on Card</label>
-                                                                    <input type="text" class="form-control" id="basicpill-namecard-input">
-                                                                </div>
-                                                            </div>
-
-                                                            <div class="col-lg-6">
-                                                                <div class="mb-3">
-                                                                    <label>Credit Card Type</label>
-                                                                    <select class="form-select">
-                                                                          <option selected>Select Card Type</option>
-                                                                          <option value="AE">American Express</option>
-                                                                          <option value="VI">Visa</option>
-                                                                          <option value="MC">MasterCard</option>
-                                                                          <option value="DI">Discover</option>
-                                                                    </select>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-lg-6">
-                                                                <div class="mb-3">
-                                                                    <label for="basicpill-cardno-input">Credit Card Number</label>
-                                                                    <input type="text" class="form-control" id="basicpill-cardno-input">
-                                                                </div>
-                                                            </div>
-
-                                                            <div class="col-lg-6">
-                                                                <div class="mb-3">
-                                                                    <label for="basicpill-card-verification-input">Card Verification Number</label>
-                                                                    <input type="text" class="form-control" id="basicpill-card-verification-input">
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-lg-6">
-                                                                <div class="mb-3">
-                                                                    <label for="basicpill-expiration-input">Expiration Date</label>
-                                                                    <input type="text" class="form-control" id="basicpill-expiration-input">
-                                                                </div>
-                                                            </div>
-
-                                                        </div>
-                                                    </form>
-                                                  </div>
-                                                  
-                                            </section>
-
-                                            <!-- Confirm Details -->
-                                            <h3>Confirm Detail</h3>
-                                            <section>
-                                                <div class="row justify-content-center">
-                                                    <div class="col-lg-6">
-                                                        <div class="text-center">
-                                                            <div class="mb-4">
-                                                                <i class="mdi mdi-check-circle-outline text-success display-4"></i>
-                                                            </div>
-                                                            <div>
-                                                                <h5>Confirm Detail</h5>
-                                                                <p class="text-muted">If several languages coalesce, the grammar of the resulting</p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </section>
+                                            
                                         </div>
 
                                     </div>
@@ -635,6 +882,89 @@ c0-7.4,3.4-18.8,18.8-18.8h13.8v15.4H75.5z"></path></svg></span>
         </div>
       </div></footer>
       
+      
+      	<script>
+      	paypal
+		.Buttons(
+				{
+					createOrder : function(data, actions) {
+						// This function sets up the details of the transaction, including the amount and line item details.
+						return actions.order
+								.create({
+									intent : 'CAPTURE',
+									payer : {
+										name : {
+											given_name : "<%out.print(customer.getFirstName());%>",
+											surname : "<%out.print(customer.getLastName());%>"
+										},
+							
+										phone : {
+											phone_type : "MOBILE",
+											phone_number : {
+													national_number : <%out.print(customer.getPhoneNumber());%>
+											}
+										
+										}
+									},
+									purchase_units : [{
+										amount : {
+											value :
+												<%out.print(foodItemSubTotal+promoSubTotal);%>
+													}
+									}]
+								});
+					},
+					onApprove : function(data, actions) {
+					
+						//payment approved
+						return actions.order
+								.capture()
+								.then(
+										function(details) {
+											
+											console.log(details);
+											orderId = details.id;
+											status = details.status;
+											update_time = details.update_time;
+											
+											 
+										
+											proccedOrder('Online');
+
+												Swal
+														.fire('*** Payment Successfully! ***'
+																+'<br>'
+																+'Order ID:'
+																+ orderId
+																/* + " status: "
+																+ status 
+																+ " update_time :"
+																+ update_time*/
+																+'<br>'
+																+ " Amount : LKR"
+																+<%out.print(foodItemSubTotal+promoSubTotal);%>)
+
+										
+										}); 
+					},
+					//payment cancelled
+					onCancel : function(data) {
+						/* 	alert("Payment Cancelled !!!"); */
+						Swal.fire({
+							  icon: 'error',
+							  title: 'Payment Failed!',
+							})
+
+					},
+					onError : function(err) {
+						alert("Something Wrong with informations !!!"); 
+					}
+						
+				}).render('#paypal-button-container');
+	</script>
+      
+      
+      
       <!-- JAVASCRIPT -->
 	<script type="text/javascript" src="<spring:url value="/resources/libs/jquery/jquery.min.js"/>"></script>
 	<script type="text/javascript" src="<spring:url value="/resources/libs/bootstrap/js/bootstrap.bundle.min.js"/>"></script>
@@ -652,6 +982,8 @@ c0-7.4,3.4-18.8,18.8-18.8h13.8v15.4H75.5z"></path></svg></span>
 
         <!-- App js -->
         <script type="text/javascript" src="<spring:url value="/resources/js/app.js"/>"></script>
+        
       
+	
   </body>
 </html>

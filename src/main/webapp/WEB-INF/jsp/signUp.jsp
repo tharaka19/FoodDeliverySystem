@@ -14,6 +14,8 @@
 	<meta content="Themesbrand" name="author" />
 	<!-- App favicon -->
 	<link rel="shortcut icon" href="<spring:url value="/resources/images/favicon.ico"/>">
+	<!-- Sweet Alert-->
+	<link rel="stylesheet" id="bootstrap-style" href="<spring:url value="/resources/libs/sweetalert2/sweetalert2.min.css"/> ">
 	<!-- Bootstrap Css -->
 	<link rel="stylesheet" id="bootstrap-style" href="<spring:url value="/resources/css/bootstrap.min.css"/> ">
 	<!-- Icons Css -->
@@ -21,14 +23,44 @@
 	<!-- App Css-->
 	<link rel="stylesheet" id="app-style" href="<spring:url value="/resources/css/app.min.css"/> ">
 	
+	<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	
 	<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
 	
 	
 	<script>
 
 	$(document).ready(function() {
-		
+
+		getActiveDeliveryLocation("Select*","");
 	});
+
+
+	function getActiveDeliveryLocation(name,id) {
+
+		var status = "Active";
+		var data = "";
+		
+				$.ajax({
+						type : "GET",
+						url : "SignUp/getActiveDeliveryLocation/"+ status,
+						success : function(response) {
+							 data = response
+							 
+							 $("#deliveryLocationNameList").append('<option value="'+id+'">'+name+'</option>');
+							 
+								for (i = 0; i < data.length; i++) {
+									$("#deliveryLocationNameList")
+											.append(
+													' <option value="'+data[i].city+'">'+data[i].city+'</option>');			       
+								}
+
+							},
+							error : function(err) {
+								alert("error is" + err)
+							}
+						});
+	}
 
 	function ValidateEmail(inputText){
 		
@@ -62,8 +94,8 @@
 	}
 
 	function saveCustomer() {
-		alert("customersave function");
-		if($("#firstName").val() == "" || $("#lastName").val() == "" || $("#email").val() == "" || $("#phoneNumber").val() == "" || $("#userName").val() == "" || $("#password").val() == "" || $("#rePassword").val() == "" || $("#houseNoOrLane").val() == "" || $("#streetName").val() == "" || $("#city").val() == ""){
+
+		if($("#firstName").val() == "" || $("#lastName").val() == "" || $("#email").val() == "" || $("#phoneNumber").val() == "" || $("#userName").val() == "" || $("#password").val() == "" || $("#rePassword").val() == "" || $("#houseNoOrLane").val() == "" || $("#streetName").val() == "" || $("#deliveryLocationNameList").val() == ""){
 			//alert("faild");
 		}else if(ValidateEmail(document.adminform.email)){
 
@@ -88,17 +120,16 @@
 					
 				},
 				success : function(result) {
-
 					if(result > 0 ){
-						saveShippingAddress(result)
+						saveShippingAddress(result);
 					}else{
-						//customer.getEmail() + "is already registerd";
-						alert($("#email").val())
+						alert($("#email").val() + "is already registerd");
+						document.location.reload(true);
 					}
 					
 				},
 				error : function(err) {
-					alert("error is" + err)
+
 				}
 			}); 
 			
@@ -106,28 +137,30 @@
 	}
 
 	function saveShippingAddress(id){
-		alert("shipping details save function" + id);
+
+		alert("Your account has been created successlly");
 		
 		$.ajax({
 			type : "POST",
 			url : "SignUp/saveShippingAddress",
 			data : {
 
-				fullName : $("#AddressfirstName").val()+" "+$("#AddresslastName").val(),
+				fullName : $("#firstName").val()+" "+$("#lastName").val(),
 				houseNoOrLane : $("#houseNoOrLane").val(),
 				streetName : $("#streetName").val(),
-				city : $("#city").val(),
+				city : $("#deliveryLocationNameList").val(),
 				status : "On",
 				customerId : id
 				
 			},
 			success : function(result) {
-				alert(result);
+				
 			},
 			error : function(err) {
-				alert("error is" + err)
+
 			}
-		}); 
+		});
+		document.location.reload(true);
 	}
 
 		
@@ -135,7 +168,7 @@
 	
 	</head>
 
-<body class="authentication-bg" bgcolor="red">
+<body class="authentication-bg" bgcolor="red" background="<spring:url value="/resources/siteImage/pasta15_b291.jpg"/>">
 	<div class="account-pages my-5 pt-sm-5">
 		<div class="container">
 			<div class="row">
@@ -191,17 +224,19 @@
 															</div>	
 														</div>
 														
-														<div class="row">
-														  
+														<div class="row" id="deliveryLocationField">
 															<div class="col">
 																<div class="mb-3">
-																	<label class="form-label">City*</label>
-																	<input type="text" class="form-control" required placeholder="City*" name="city" id="city">
+																	<label for="cars" class="form-label" for="validationCustom01">City*</label>
+																		 	<select class="form-control" id="deliveryLocationNameList" required>
+																		 	
+																			 </select>
+																<div class="invalid-feedback">
+																	Please provide a valid city.
+																</div>
 																</div>
 															</div>
-															<div class="col">
-																
-															</div>	
+															<div class="col"></div>
 														</div>
 									
 														<div class="row">
@@ -287,9 +322,16 @@
 	<!-- App js -->
 	<script type="text/javascript" src="<spring:url value="/resources/js/app.js"/>"></script>
 
+ 	<!-- Sweet Alerts js -->
+    <script type="text/javascript" src="<spring:url value="/resources/libs/sweetalert2/sweetalert2.min.js"/>"></script>
+
+    <!-- Sweet alert init js-->
+    <script type="text/javascript" src="<spring:url value="/resources/js/pages/sweet-alerts.init.js"/>"></script>
+
 	<!-- parsleyjs -->
 	<script type="text/javascript" src="<spring:url value="/resources/libs/parsleyjs/parsley.min.js"/>"></script>
 	<script type="text/javascript" src="<spring:url value="/resources/js/pages/form-validation.init.js"/>"></script>
+	
 	
 </body>
 

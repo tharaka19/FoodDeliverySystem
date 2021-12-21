@@ -28,4 +28,5 @@ public class UserService implements UserBd{
 	public void update(User user) {
 		userRepository.update(user);
 	}
+	
 }

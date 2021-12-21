@@ -88,10 +88,10 @@
 					
 				},
 				success : function(result) {
-					alert(result);
+					alert(result)
 				},
 				error : function(err) {
-					alert("error is" + err)
+
 				}
 			}); 
 		}	

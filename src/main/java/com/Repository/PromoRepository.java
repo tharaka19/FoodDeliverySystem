@@ -37,8 +37,6 @@ public class PromoRepository implements PromoDao{
 
 	/**
 	 * get promo details by promo id
-	 * @param id
-	 * @return promo
 	 */
 	@Override
 	public Promo getById(int id) {
@@ -47,8 +45,6 @@ public class PromoRepository implements PromoDao{
 	
 	/**
 	 * get active promo details by promo status
-	 * @param status
-	 * @return promo list
 	 */
 	@SuppressWarnings({ "deprecation", "unchecked" })
 	@Override
@@ -58,8 +54,6 @@ public class PromoRepository implements PromoDao{
 	
 	/**
 	 * get promo quantity by promo id
-	 * @param id
-	 * @return promo quantity
 	 */
 	@Override
 	public int getQuantityById(int id) {
@@ -83,9 +77,5 @@ public class PromoRepository implements PromoDao{
 	public void delete(Promo promo) {
 		hibernateTemplate.delete(promo);
 	}
-
 	
-
-
-
 }

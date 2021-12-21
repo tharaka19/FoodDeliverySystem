@@ -1,4 +1,4 @@
-package com.controller;
+package com.Controller;
 
 import java.util.List;
 
@@ -136,4 +136,5 @@ public class PromoFoodController {
 		promoFoodService.delete(id);
 		return "deleted";
 	}
+	
 }

@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-    pageEncoding="ISO-8859-1" import= "com.Entity.Customer"%>
+    pageEncoding="ISO-8859-1" import= "com.Entity.Customer" import= "com.Entity.ShoppingCart" import="java.util.List"%>
 <%@taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>      
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>   
@@ -16,6 +16,8 @@
     
     <!-- App favicon -->
 	<link rel="shortcut icon" href="<spring:url value="/resources/images/favicon.ico"/>">
+	<!-- Sweet Alert-->
+	<link rel="stylesheet" id="bootstrap-style" href="<spring:url value="/resources/libs/sweetalert2/sweetalert2.min.css"/> ">
 	<!-- Bootstrap Css -->
 	<link rel="stylesheet" id="bootstrap-style" href="<spring:url value="/resources/css/bootstrap.min.css"/> ">
 	<!-- Icons Css -->
@@ -28,6 +30,8 @@
     
     <script class="u-script" type="text/javascript" src="resources/admin/js/jquery.js" ></script>
     <script class="u-script" type="text/javascript" src="resources/admin/js/nicepage.js" ></script>
+    
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -56,13 +60,83 @@
     <meta property="og:description" content="">
     <meta property="og:type" content="website">
     
+    <%
+		Customer customer = null;
+        if(session.getAttribute("customer") == null) {
+
+     	}else{
+     		customer = (Customer) session.getAttribute("customer");
+     	}
+		
+		%>
+        
+        <% 
+        float foodItemSubTotal = 0;
+        int foodItemCount = 0;
+     	if(session.getAttribute("foodItemCart") == null) {
+
+     	}else{
+     		 List<ShoppingCart> foodItemCartList = (List<ShoppingCart>) session.getAttribute("foodItemCart");
+        
+             for(int a = 0; a < foodItemCartList.size(); a++){
+            	 foodItemSubTotal = foodItemSubTotal + foodItemCartList.get(a).getFoodItemTotal();
+            	 foodItemCount = foodItemCount + 1;
+             }
+     	}
+     %>
+     
+     <% 
+        float promoSubTotal = 0;
+     	float totalDiscount = 0;
+     	int promoCount = 0;
+     	if(session.getAttribute("promoCart") == null) {
+
+     	}else{
+     		 List<ShoppingCart> promoCartList = (List<ShoppingCart>) session.getAttribute("promoCart");
+        
+             for(int a = 0; a < promoCartList.size(); a++){
+            	 promoSubTotal = promoSubTotal + promoCartList.get(a).getPromoTotal();
+            	 totalDiscount = totalDiscount + promoCartList.get(a).getPromoTotalDiscount();
+            	 promoCount = promoCount +1;
+             }
+     	}
+     %>  
     
     <script>
 
 	$(document).ready(function() {
 		$('#idField').hide();
 		getAllShippingDetails();
+		getActiveDeliveryLocation("Select*","");
+		getAllOrderByCustomerId();
+
 	});
+
+	function getActiveDeliveryLocation(name,id) {
+
+		var status = "Active";
+		var data = "";
+		
+				$.ajax({
+						type : "GET",
+						url : "SignUp/getActiveDeliveryLocation/"+ status,
+						success : function(response) {
+							 data = response
+							 
+							 $("#deliveryLocationNameList").append('<option value="'+id+'">'+name+'</option>');
+							 
+								for (i = 0; i < data.length; i++) {
+									$("#deliveryLocationNameList")
+											.append(
+													' <option value="'+data[i].city+'">'+data[i].city+'</option>');			       
+								}
+
+							},
+							error : function(err) {
+								alert("error is" + err)
+							}
+						});
+	}
 
 	function ValidateEmail(inputText){
 		
@@ -85,8 +159,18 @@
 		}
 	}
 
+	function CheckPassword(inputtxt) {
+		
+		var decimal=  /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
+		if(inputtxt.value.match(decimal)) {
+			return false;
+		}else{
+			return true;
+		}
+	}
+	
 	function updateCustomer() {
-		alert("update customer");
+		
 		if($("#firstName").val() == "" || $("#lastName").val() == "" || $("#email").val() == "" || $("#phoneNumber").val() == ""){
 			//alert("faild");
 		}else if(ValidateEmail(document.customerForm.email)){
@@ -108,6 +192,11 @@
 					
 				},
 				success : function(result) {
+					Swal.fire(
+							  'Good job!',
+							  'You clicked the button!',
+							  'success'
+							),
 					getCustomer($("#id").val())
 					
 				},
@@ -124,8 +213,9 @@
 			url : "MyAccount/getCustomer/" + id,
 			dataType : 'json',
 		});
-		  alert(" finish");
 		document.location.reload(true);
+		document.location.reload(true);
+		
 	}
 
    function getAllShippingDetails() {
@@ -151,8 +241,8 @@
 												' <tr style="height: 46px;">'
 												+ '<td class="u-table-cell">' + data[i].fullName + '</td>'
 												+ '<td class="u-table-cell">' + data[i].houseNoOrLane + '<br>'+ data[i].streetName +'<br>'+ data[i].city +'</td>'
-												+ '<td class="u-table-cell"><div id="activeLable" class="badge bg-pill bg-soft-success font-size-12">'+ data[i].status +'</div></td>'
-												+ '<td class="u-table-cell"><input type="button" id="deactiveBtn" class="btn btn-outline-info waves-effect waves-light" onclick="offShippingDetailsStatus('+ data[i].id + ')" value="Off"></input></td>'
+												+ '<td class="u-table-cell"> <div id="activeLable" class="badge bg-pill bg-soft-success font-size-12">'+ data[i].status +'</div></td>'
+												+ '<td class="u-table-cell"> <input type="button" id="deactiveBtn" class="btn btn-outline-info waves-effect waves-light" onclick="offShippingDetailsStatus('+ data[i].id + ')" value="Off"></input></td>'
 												+ '</tr>');
 									}else{
 										
@@ -161,7 +251,7 @@
 												' <tr style="height: 46px;">'
 												+ '<td class="u-table-cell">' + data[i].fullName + '</td>'
 												+ '<td class="u-table-cell">' + data[i].houseNoOrLane + '<br>'+ data[i].streetName +'<br>'+ data[i].city +'</td>'
-												+ '<td class="u-table-cell"><div id="deactiveLable" class="badge bg-pill bg-soft-danger font-size-12">'+ data[i].status +'</div></td>'
+												+ '<td class="u-table-cell"> <div id="deactiveLable" class="badge bg-pill bg-soft-danger font-size-12">'+ data[i].status +'</div></td>'
 												+ '<td class="u-table-cell"> <input type="button" id="activeBtn" class="btn btn-outline-info waves-effect waves-light" onclick="onShippingDetailsStatus('+ data[i].id + ')" value="On"></input></td>'
 												+ '</tr>');
 									}
@@ -175,8 +265,8 @@
 	}
 
    function saveShippingDetails() {
-	   alert($("#square-switch1").val());
-		if($("#AddressfirstName").val() == "" || $("#AddresslastName").val() == "" ||  $("#houseNoOrLane").val() == "" || $("#streetName").val() == "" || $("#city").val() == ""){
+
+	   if($("#AddressfirstName").val() == "" || $("#AddresslastName").val() == "" ||  $("#houseNoOrLane").val() == "" || $("#streetName").val() == "" || $("#city").val() == ""){
 			//alert("faild");
 		}else{
 			
@@ -189,7 +279,7 @@
 					fullName : $("#AddressfirstName").val()+" "+$("#AddresslastName").val(),
 					houseNoOrLane : $("#houseNoOrLane").val(),
 					streetName : $("#streetName").val(),
-					city : $("#city").val(),
+					city : $("#deliveryLocationNameList").val(),
 					status : $("#square-switch1").val()
 					
 				},
@@ -210,17 +300,14 @@
 	function checkValue(){
 		if($("#square-switch1").val() == "Off"){
 			$("#square-switch1").val("On");
-			alert($("#square-switch1").val());
 		}else{
-			$("#square-switch1").val("Off");
-			alert($("#square-switch1").val());
-			
+			$("#square-switch1").val("Off");			
 		}
 		
 	}
 
 	function onShippingDetailsStatus(id) {
-		alert("sd");
+
 		$.ajax({
 			type : "POST",
 			url : "MyAccount/updateShoppingDetailsStatus",
@@ -264,24 +351,333 @@
 			});
 				
 	}
+	
+	function checkPassword(){
+		if($("#currentPassword").val() == "" || $("#password").val() == "" || $("#rePassword").val() == ""){
+
+		}else if(CheckPassword(document.passwordForm.password)){
+
+		}else if($("#password").val() != $("#rePassword").val()){
+
+		}else{
+
+			$.ajax({
+				type : "POST",
+				url : "MyAccount/checkPassword",
+				data : {
+					
+					id : $("#id").val(),
+					currentPassword : $("#currentPassword").val()
+	                
+				},
+				success : function(result) {
+
+					if(result){
+						updatePassword();
+						
+					}else{
+						alert("invalid current password");
+						document.location.reload(true);							
+					}
+					
+				},
+				error : function(err) {
+					alert("error is" + err)
+				}
+			});
+		}	
+	}
+
+	function updatePassword(){
 		
+		$.ajax({
+			type : "POST",
+			url : "MyAccount/updatePassword",
+			data : {
+				
+				id : $("#id").val(),
+				password : $("#password").val()
+                
+			},
+			success : function(result) {
+
+			},
+			error : function(err) {
+				alert("error is" + err)
+			}
+		});
+		document.location.reload(true);
+
+		Swal.fire(
+				  'Good job!',
+				  'You clicked the button!',
+				  'success'
+				);
+	}
+
+	function getAllOrderByCustomerId() {
+
+		var data = "";
+				$.ajax({
+						type : "POST",
+						url : "MyAccount/getAllOrderByCustomerId",
+						data : {
+							
+							id : $("#id").val()
+			                
+						},
+						success : function(response) {
+							 data = response
+							 
+								$('.tr').remove();
+								for (i = 0; i < data.length; i++) {
+									
+									if(data[i].status == "Pending"){
+
+										$("#orderTable")
+										.append(
+												'<tr style="height: 46px;">'
+												        + '<td class="u-table-cell">' + data[i].id + '</td>'
+												        + '<td class="u-table-cell">' + data[i].itemCount + '</td>'
+												        + '<td class="u-table-cell">Rs ' + data[i].subTotal + '.00</td>'
+												        + '<td class="u-table-cell">Rs ' + data[i].deliveryFee + '.00</td>'
+												        + '<td class="u-table-cell">Rs ' + data[i].totalDiscount + '.00</td>'
+												        + '<td class="u-table-cell">Rs ' + data[i].total + '.00</td>'
+												        + '<td class="u-table-cell">  <input type="button" class="btn btn-outline-secondary waves-effect" onclick="getFoodItemOrdeDetails(' + data[i].id + ')" data-toggle="modal" data-target="#foodItemCart" value="Food Item Order"></input></td>'
+												        + '<td class="u-table-cell">  <input type="button" class="btn btn-outline-secondary waves-effect" onclick="getPromoOrdeDetails(' + data[i].id + ')" data-toggle="modal" data-target="#promoCart" value="Promo Order"></input></td>'
+												        + '<td class="u-table-cell">  <input type="button" class="btn btn-outline-secondary waves-effect" onclick="getCustomerShippingDetails(' + data[i].shippingDetails.id + ')" data-toggle="modal" data-target="#customerCart" value="Address"></input></td>'
+												        + '<td class="u-table-cell">' + data[i].date + '</td>'
+												        + '<td class="u-table-cell">  <div id="activeLable" class="badge bg-pill bg-soft-warning font-size-12">'+ data[i].status +'</div> </td>'
+												        + '</tr>');
+
+									
+									}else if(data[i].status == "Confirm"){
+
+										$("#orderTable")
+										.append(
+												'<tr style="height: 46px;">'
+												        + '<td class="u-table-cell">' + data[i].id + '</td>'
+												        + '<td class="u-table-cell">' + data[i].itemCount + '</td>'
+												        + '<td class="u-table-cell">' + data[i].subTotal + '</td>'
+												        + '<td class="u-table-cell">' + data[i].deliveryFee + '</td>'
+												        + '<td class="u-table-cell">' + data[i].totalDiscount + '</td>'
+												        + '<td class="u-table-cell">' + data[i].total + '</td>'
+												        + '<td class="u-table-cell">  <input type="button" class="btn btn-outline-secondary waves-effect" onclick="getFoodItemOrdeDetails('+ data[i].id + ')" data-toggle="modal" data-target="#foodItemCart" value="Food Item Order"></input></td>'
+												        + '<td class="u-table-cell">  <input type="button" class="btn btn-outline-secondary waves-effect" onclick="getPromoOrdeDetails('+ data[i].id + ')" data-toggle="modal" data-target="#promoCart" value="Promo Order"></input></td>'
+												        + '<td class="u-table-cell">  <input type="button" class="btn btn-outline-secondary waves-effect" onclick="getCustomerShippingDetails(' + data[i].shippingDetails.id + ')" data-toggle="modal" data-target="#customerCart" value="Address"></input></td>'
+												        + '<td class="u-table-cell">' + data[i].date + '</td>'
+												        + '<td class="u-table-cell">  <div id="deactiveLable" class="badge bg-pill bg-soft-success font-size-12">'+ data[i].status +'</div>  </td>'
+												        + '<td class="u-table-cell">  <input type="button" class="btn btn-outline-secondary waves-effect" onclick="getPaidPayment(' + data[i].id + ')" data-toggle="modal" data-target="#invoiceCart" value="Invoice"></input></td>'
+												        + '</tr>');
+									
+									}else{
+
+										$("#orderTable")
+										.append(
+												'<tr style="height: 46px;">'
+												        + '<td class="u-table-cell">' + data[i].id + '</td>'
+												        + '<td class="u-table-cell">' + data[i].itemCount + '</td>'
+												        + '<td class="u-table-cell">' + data[i].subTotal + '</td>'
+												        + '<td class="u-table-cell">' + data[i].deliveryFee + '</td>'
+												        + '<td class="u-table-cell">' + data[i].totalDiscount + '</td>'
+												        + '<td class="u-table-cell">' + data[i].total + '</td>'
+												        + '<td class="u-table-cell">  <input type="button" class="btn btn-outline-secondary waves-effect" onclick="getFoodItemOrdeDetails('+ data[i].id + ')" data-toggle="modal" data-target="#foodItemCart" value="Food Item Order"></input></td>'
+												        + '<td class="u-table-cell">  <input type="button" class="btn btn-outline-secondary waves-effect" onclick="getPromoOrdeDetails('+ data[i].id + ')" data-toggle="modal" data-target="#promoCart" value="Promo Order"></input></td>'
+												        + '<td class="u-table-cell">  <input type="button" class="btn btn-outline-secondary waves-effect" onclick="getCustomerShippingDetails(' + data[i].shippingDetails.id + ')" data-toggle="modal" data-target="#customerCart" value="Address"></input></td>'
+												        + '<td class="u-table-cell">' + data[i].date + '</td>'
+												        + '<td class="u-table-cell">  <div id="deactiveLable" class="badge bg-pill bg-soft-danger font-size-12">'+ data[i].status +'</div>  </td>'
+												        + '</tr>');
+									}
+									
+								}
+
+							},
+							error : function(err) {
+								alert("error is" + err)
+							}
+						});
+	}
+
+
+	function getFoodItemOrdeDetails(id){
+
+		$.ajax({
+			type : "POST",
+			url : "AdminDashbord/Order/getFoodItemOrdeDetails",
+			data : {
+				
+				id : id
+                
+			},
+			success : function(response) {	
+				data = response
+								 
+				$('.tr').remove();
+				for (i = 0; i < data.length; i++) {
+					
+						$("#foodItemOrderTable")
+						.append(
+								'<tr class="tr">'
+								        + '<td>' + data[i].foodItem.id + '</td>'
+								        + '<td>' + data[i].foodItem.name + '</td>'
+								        + '<td>' + data[i].quantity + '</td>'
+								        + '<td>' + data[i].total + '</td>'
+								        + '</tr>');
+
+						$("#invoiceFoodItem").append(
+								'<tr>'
+								+ '<th scope="row">01</th>'
+								+ '<td><h5 class="font-size-15 mb-1">' + data[i].foodItem.name + '</h5>'
+								+ '<ul class="list-inline mb-0">'
+								+ '<li class="list-inline-item">Color : <span class="fw-medium">Gray</span></li><li class="list-inline-item">Size : <span class="fw-medium">08</span></li>'
+								+ '</ul></td>'
+								+ '<td>' + data[i].foodItem.price + '</td>'
+								+ '<td>' + data[i].quantity + '</td>'
+								+ '<td>0.0</td>'
+								+ '<td class="text-end">' + data[i].total + '</td>'
+								+ '</tr>');
+				}
+			},
+			error : function(err) {
+				alert("error is" + err)
+			}
+		});
+	}
+
+	function getPromoOrdeDetails(id){
+
+		$.ajax({
+			type : "POST",
+			url : "AdminDashbord/Order/getPromoOrdeDetails",
+			data : {
+				
+				id : id
+                
+			},
+			success : function(response) {	
+				data = response
+								 
+				$('.tr').remove();
+				for (i = 0; i < data.length; i++) {
+					
+						$("#promoOrderTable")
+						.append(
+								'<tr class="tr">'
+								        + '<td>' + data[i].promo.id + '</td>'
+								        + '<td>' + data[i].promo.name + '</td>'
+								        + '<td>' + data[i].quantity + '</td>'
+								        + '<td>' + data[i].discount + '</td>'
+								        + '<td>' + data[i].total + '</td>'
+								        + '</tr>');
+
+						$("#invoiceFoodItem").append(
+								'<tr>'
+								+ '<th scope="row">01</th>'
+								+ '<td><h5 class="font-size-15 mb-1">' + data[i].promo.name + '</h5>'
+								+ '<ul class="list-inline mb-0">'
+								+ '<li class="list-inline-item">Color : <span class="fw-medium">Gray</span></li><li class="list-inline-item">Size : <span class="fw-medium">08</span></li>'
+								+ '</ul></td>'
+								+ '<td>' + data[i].promo.price + '</td>'
+								+ '<td>' + data[i].quantity + '</td>'
+								+ '<td>' + data[i].discount + '</td>'
+								+ '<td class="text-end">' + data[i].total + '</td>'
+								+ '</tr>');
+				}
+			},
+			error : function(err) {
+				alert("error is" + err)
+			}
+		});
+	}
+
+	function getCustomerShippingDetails(id){
+
+		$.ajax({
+			type : "GET",
+			url : "AdminDashbord/Order/getCustomerShippingDetails/"+ id,
+			dataType : 'json',
+			success : function(response) {	
+				data = response,
+
+				$("#shippingTable")
+				.append(
+						'<div class="col-lg-4 col-sm-6">'
+						+ '<div class="card border rounded active shipping-address">'
+						+ '<div class="card-body">'
+						+ '<h5 class="font-size-14 mb-4">Order Address</h5>'
+						+ '<h5 class="font-size-14">' + data.fullName + '</h5>'
+						+ '<p class="mb-1">' + data.houseNoOrLane + ',<br>'+ data.streetName + ',<br>' + data.city + '</p>'
+						+ '<div class="square-switch">'
+						+ '</div></div></div></div>');
+
+				
+			},
+			error : function(err) {
+				alert("error is" + err)
+			}
+		});
+	}
+
+
+	function getPaidPayment(id){
+
+		$.ajax({
+			type : "POST",
+			url : "Payment/getPaidPayment",
+			data : {
+				
+				orderId : id
+                
+			},
+			success : function(response) {	
+				data = response
+
+				if(data.status == "Paid"){
+					$('#invoiceRow').show();
+					$("#customerOrderDetails").append(
+							                          '<h5 class="font-size-16 mb-3">Billed To:</h5>'
+	                          						 + '<h5 class="font-size-15 mb-2">'+ data.customerOrder.shippingDetails.fullName +'</h5>'
+	                          						 + '<p class="mb-1">'+ data.customerOrder.shippingDetails.houseNoOrLane +'<br>'+ data.customerOrder.shippingDetails.streetName +'<br>'+ data.customerOrder.shippingDetails.city +'</p>'
+	                          						 + '<p class="mb-1">PrestonMiller@armyspy.com</p>'
+	                          						 + '<p>001-234-5678</p>');
+					
+					
+					$("#invoiceDetails").append(
+												'<div><h5 class="font-size-16 mb-1">Invoice No:</h5><p>#'+ data.customerOrder.id +'</p></div>'
+												+ '<div class="mt-4"><h5 class="font-size-16 mb-1">Invoice Date:</h5><p>'+ data.date +'</p></div>'
+												+ '<div class="mt-4"><h5 class="font-size-16 mb-1">Order No:</h5><p>#'+ data.customerOrder.id +'</p></div>');
+
+					getFoodItemOrdeDetails(id);
+
+					$("#invoiceOrderDetails").append(
+													'<tr><th scope="row" colspan="4" class="text-end">Sub Total</th><td class="text-end">'+ data.customerOrder.subTotal +'</td></tr>'
+													+ '<tr><th scope="row" colspan="4" class="border-0 text-end">Delivery Fee :</th><td class="border-0 text-end">'+ data.customerOrder.deliveryFee +'</td></tr>'
+													+ '<tr><th scope="row" colspan="4" class="border-0 text-end">Total Discount :</th><td class="border-0 text-end">'+ data.customerOrder.totalDiscount +'</td></tr>'
+													+ '<tr><th scope="row" colspan="4" class="border-0 text-end">Total</th><td class="border-0 text-end"><h4 class="m-0">'+ data.customerOrder.total +'</h4></td></tr>');
+
+				}else{
+					$('#invoiceRow').hide();
+				}
+
+				
+			},
+			error : function(err) {
+				alert("error is" + err)
+			}
+		});
+	}
 	</script>
     
   </head>
   <body class="u-body u-overlap u-overlap-contrast"><header class=" u-clearfix u-header u-section-row-container" id="sec-8947"><div class="u-section-rows" style="margin-bottom: 0px;">
+        
+         
+        
+        
         <div class="u-section-row u-sticky u-sticky-e2a9 u-section-row-1" id="sec-71fa">
           
           
-        <%
-		Customer customer = null;
-        if(session.getAttribute("customer") == null) {
-
-     	}else{
-     		customer = (Customer) session.getAttribute("customer");
-     	}
-		
-		%>
-          
+       
           
           <div class="u-clearfix u-sheet u-valign-middle-xl u-sheet-1">
             <h2 class="u-subtitle u-text u-text-default u-text-grey-15 u-text-1" data-animation-name="fadeIn" data-animation-duration="1000" data-animation-delay="0" data-animation-direction="Down">HENRY BAKERS</h2><span class="u-black u-icon u-icon-circle u-spacing-7 u-text-custom-color-2 u-icon-1"><svg class="u-svg-link" preserveAspectRatio="xMidYMin slice" viewBox="0 0 512 512" style=""><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-1b47"></use></svg><svg class="u-svg-content" viewBox="0 0 512 512" x="0px" y="0px" id="svg-1b47" style="enable-background:new 0 0 512 512;"><g><g><path d="M498.682,435.326L297.917,234.56L63.357,0H45.026l-3.743,9.511c-9.879,25.104-14.1,50.78-12.205,74.249    c2.16,26.752,12.323,49.913,29.392,66.982L241.58,333.852l24.152-24.152l169.285,189.293c16.84,16.84,45.825,17.84,63.665,0    C516.236,481.439,516.236,452.879,498.682,435.326z"></path>
@@ -359,7 +755,7 @@
             <a class="u-shopping-cart u-shopping-cart-1" href="./ShoppingCart"><span class="u-icon u-shopping-cart-icon"><svg class="u-svg-link" preserveAspectRatio="xMidYMin slice" viewBox="0 0 16 16" style=""><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-58a1"></use></svg><svg class="u-svg-content" viewBox="0 0 16 16" x="0px" y="0px" id="svg-58a1"><path d="M14.5,3l-2.1,5H6.1L5.9,7.6L4,3H14.5 M0,0v1h2.1L5,8l-2,4h11v-1H4.6l1-2H13l3-7H3.6L2.8,0H0z M12.5,13
 	c-0.8,0-1.5,0.7-1.5,1.5s0.7,1.5,1.5,1.5s1.5-0.7,1.5-1.5S13.3,13,12.5,13L12.5,13z M4.5,13C3.7,13,3,13.7,3,14.5S3.7,16,4.5,16
 	S6,15.3,6,14.5S5.3,13,4.5,13L4.5,13z"></path></svg>
-        <span class="u-icon-circle u-palette-1-base u-shopping-cart-count" style="font-size: 0.75rem;"><!--shopping_cart_count-->2<!--/shopping_cart_count--></span>
+        <span class="u-icon-circle u-palette-1-base u-shopping-cart-count" style="font-size: 0.75rem;"><!--shopping_cart_count--><%out.print(foodItemCount + promoCount);%><!--/shopping_cart_count--></span>
     </span>
             </a><!--/shopping_cart-->
           </div>
@@ -408,10 +804,9 @@
             <li class="u-tab-item u-tab-item-4" role="presentation">
               <a class="u-active-custom-color-2 u-button-style u-hover-palette-2-base u-tab-link u-text-active-black u-text-body-color u-text-hover-white u-tab-link-4" id="tab-d7e7" href="#link-tab-d7e7" role="tab" aria-controls="link-tab-d7e7" aria-selected="false"> Past Orders</a>
             </li>
-            <li class="u-tab-item u-tab-item-5" role="presentation">
-              <a class="u-active-custom-color-2 u-button-style u-hover-palette-2-base u-tab-link u-text-active-black u-text-body-color u-text-hover-white u-tab-link-5" id="tab-6219" href="#link-tab-6219" role="tab" aria-controls="link-tab-6219" aria-selected="false"> Saved Carts</a>
-            </li>
+            
           </ul>
+          
           <div class="u-tab-content">
             <div class="u-container-style u-tab-active u-tab-pane u-white u-tab-pane-1" id="tab-081f" role="tabpanel" aria-labelledby="link-tab-081f">
               <div class="u-container-layout u-valign-middle u-container-layout-1">
@@ -460,7 +855,7 @@
 																<div class="mb-3">
 																	<label class="form-label">Email</label>
 																	<div>
-																		<input type="email" class="form-control" required parsley-type="email" placeholder="Email" name="email" id="email" value="<%out.print(customer.getEmail());%>"/>
+																		<input type="email" class="form-control" required parsley-type="email" placeholder="Email" name="email" id="email" readonly="readonly" value="<%out.print(customer.getEmail());%>"/>
 																	</div>
 																</div>
 															</div>
@@ -584,11 +979,16 @@
 															<div class="col"></div>
 														</div>
 														
-														<div class="row">
-														  <div class="col"></div>
+														<div class="row" id="deliveryLocationField">
+														<div class="col"></div>
 															<div class="col">
 																<div class="mb-3">
-																	<input type="text" class="form-control" required placeholder="City*" name="city" id="city"/>
+																		 	<select class="form-control" id="deliveryLocationNameList" required>
+																		 	
+																			 </select>
+																<div class="invalid-feedback">
+																	Please provide a valid city.
+																</div>
 																</div>
 															</div>
 															<div class="col"></div>
@@ -632,29 +1032,54 @@
             <div class="u-container-style u-tab-pane u-white u-tab-pane-5" id="tab-3a42" role="tabpanel" aria-labelledby="link-tab-3a42">
               <div class="u-container-layout u-container-layout-5">
                 <div class="u-form u-form-3">
-                  <form action="#" method="POST" class="u-clearfix u-form-spacing-50 u-form-vertical u-inner-form" source="custom" name="form-2" style="padding: 50px;">
-                    <div class="u-form-group u-form-group-15">
-                      <label for="text-a68f" class="u-label u-label-13">Current Password</label>
-                      <input type="text" placeholder="Current Password" id="text-a68f" name="password" class="u-border-1 u-border-grey-30 u-input u-input-rectangle u-radius-50 u-white u-input-12">
-                    </div>
-                    <div class="u-form-group u-form-partition-factor-2 u-form-group-16">
-                      <label for="text-d136" class="u-label u-label-14">New Password</label>
-                      <input type="text" placeholder="New Password" id="text-d136" name="password-2" class="u-border-1 u-border-grey-30 u-input u-input-rectangle u-radius-50 u-white u-input-13">
-                    </div>
-                    <div class="u-form-group u-form-partition-factor-2 u-form-group-17">
-                      <label for="text-a69e" class="u-label u-label-15">Confirm New Password</label>
-                      <input type="text" placeholder="Confirm New Password" id="text-a69e" name="password-1" class="u-border-1 u-border-grey-30 u-input u-input-rectangle u-radius-50 u-white u-input-14">
-                    </div>
-                    <div class="u-align-right u-form-group u-form-submit">
-                      <a href="#" class="u-active-custom-color-2 u-border-none u-btn u-btn-round u-btn-submit u-button-style u-hover-palette-2-base u-palette-4-dark-1 u-radius-50 u-text-active-black u-btn-3">Save<br>
-                      </a>
-                      <input type="submit" value="submit" class="u-form-control-hidden">
-                    </div>
-                    <div class="u-form-send-message u-form-send-success"> Thank you! Your message has been sent. </div>
-                    <div class="u-form-send-error u-form-send-message"> Unable to send your message. Please fix errors then try again. </div>
-                    <input type="hidden" value="" name="recaptchaResponse">
-                  </form>
+                  
+                  <form class="custom-validation" id="passwordForm" name="passwordForm">
+								
+								<div class="row">
+								
+														<div class="row">
+														 
+															<div class="col">
+																<div class="mb-3">
+																	<label class="form-label">Current Password</label>
+																	<input type="password" class="form-control" required placeholder="Current Password" name="currentPassword" id="currentPassword" />
+																</div>
+															</div>
+															
+														</div>
+														
+													<div class="row">
+															<div class="col">
+																<div class="mb-3">
+																	<label class="form-label">New Password</label>
+																		<input type="password" class="form-control" required placeholder="New Password" name="password" id="password" pattern="/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/"/>
+																</div>
+														   </div>
+														   <div class="col">
+																<div class="mb-3">
+																	<label class="form-label">Confirm New Password</label>
+																			<input type="password" class="form-control" required data-parsley-equalto="#password" placeholder="Confirm New Password" id="rePassword"/>
+																</div>
+														  </div>
+													</div>
+													
+													<div class="row">
+														    <div class="col"></div>
+															<div class="col"></div>
+															<div class="col">
+															<br><br>
+																<div class="mt-3 text-end">
+																	<button class="btn btn-success" type="submit" id=checkPasswordBtn onclick="checkPassword()">Save</button>
+																</div>
+															</div>
+													</div>
+														
+											</div>
+									
+								</form>
                 </div>
+                <br>
+                <br>
                 <p class="u-small-text u-text u-text-palette-1-dark-1 u-text-variant u-text-1"> &nbsp;<span class="u-icon u-icon-1"><svg class="u-svg-content" viewBox="0 -17 511.99984 511" style="width: 1em; height: 1em;"><path d="m502.578125 365.441406-180.953125-326.226562c-13.503906-24.011719-38.117188-38.714844-65.726562-38.714844-27.609376 0-52.21875 14.707031-65.722657 38.714844l-180.753906 326.226562c-12.902344 23.410156-12.601563 51.320313 1.203125 74.429688 13.503906 23.109375 37.8125 36.914062 64.523438 36.914062h361.703124c26.710938 0 51.019532-13.804687 64.523438-36.914062 13.804688-23.109375 14.105469-51.019532 1.203125-74.429688zm0 0" fill="#fdbf00"></path><path d="m501.375 439.871094c-13.503906 23.109375-37.8125 36.914062-64.523438 36.914062h-180.953124v-476.285156c27.609374 0 52.222656 14.707031 65.726562 38.714844l180.953125 326.226562c12.902344 23.410156 12.601563 51.320313-1.203125 74.429688zm0 0" fill="#ff9f00"></path><path d="m225.886719 341.734375h60.023437v60.023437h-60.023437zm0 0" fill="#523e6d"></path><path d="m255.898438 341.734375h30.011718v60.023437h-30.011718zm0 0" fill="#3e254c"></path><path d="m225.886719 131.652344h60.023437v150.058594h-60.023437zm0 0" fill="#523e6d"></path><path d="m255.898438 131.652344h30.011718v150.058594h-30.011718zm0 0" fill="#3e254c"></path></svg><img></span>&nbsp;Password should contain at least one Uppercase,Numeric &amp; Special character.&nbsp; <span class="u-icon"></span>
                   <br>
                 </p>
@@ -664,59 +1089,257 @@
               <div class="u-container-layout u-container-layout-6">
                 <div class="u-table u-table-responsive u-table-2">
                   <table class="u-table-entity">
-                    <colgroup>
-                      <col width="20%">
-                      <col width="20%">
-                      <col width="20%">
-                      <col width="20%">
-                      <col width="20%">
-                    </colgroup>
+                   
                     <thead class="u-align-center u-palette-2-light-1 u-table-header u-table-header-2">
                       <tr style="height: 46px;">
-                        <th class="u-table-cell">Order Number</th>
+                        <th class="u-table-cell">Order ID</th>
+                        <th class="u-table-cell">Item Count</th>
+                        <th class="u-table-cell">SubTotal</th>
+                        <th class="u-table-cell">Delivery Charges</th>
+                        <th class="u-table-cell">Total Discount</th>
+                        <th class="u-table-cell">Total</th>
+                        <th class="u-table-cell">Food Item Order</th>
+                        <th class="u-table-cell">Promo Order</th>
+                        <th class="u-table-cell">Address</th>
                         <th class="u-table-cell">Created Date</th>
-                        <th class="u-table-cell">Shipping Address</th>
-                        <th class="u-table-cell">Amount</th>
-                        <th class="u-table-cell">Shipping Method</th>
+                        <th class="u-table-cell">Status</th>
+                        <th class="u-table-cell">Invoice</th>
                       </tr>
                     </thead>
-                    <tbody class="u-align-center u-table-alt-grey-25 u-table-body u-text-black">
-                      <tr style="height: 46px;">
-                        <td class="u-table-cell"></td>
-                        <td class="u-table-cell"></td>
-                        <td class="u-table-cell"></td>
-                        <td class="u-table-cell"></td>
-                        <td class="u-table-cell"></td>
-                      </tr>
+                    <tbody class="u-align-center u-table-body" id="orderTable">
+                      
+                        
                     </tbody>
                   </table>
                 </div>
               </div>
             </div>
-            <div class="u-container-style u-tab-pane u-white u-tab-pane-7" id="link-tab-6219" role="tabpanel" aria-labelledby="tab-6219">
-              <div class="u-container-layout u-container-layout-7">
-                <div class="u-table u-table-responsive u-table-3">
-                  <table class="u-table-entity">
-                    <colgroup>
-                      <col width="50%">
-                      <col width="50%">
-                    </colgroup>
-                    <thead class="u-align-center u-palette-2-light-1 u-table-header u-table-header-3">
-                      <tr style="height: 46px;">
-                        <th class="u-table-cell">Template Name</th>
-                        <th class="u-table-cell">No of Items</th>
-                      </tr>
-                    </thead>
-                    <tbody class="u-table-body">
-                      <tr style="height: 46px;">
-                        <td class="u-table-cell"></td>
-                        <td class="u-table-cell"></td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
+            
+		<!-- Modal customerCart -->
+							<div class="modal fade" id="customerCart" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+							  <div class="modal-dialog modal-lg" role="document">
+							    <div class="modal-content">
+							      <div class="modal-header">
+							        <h5 class="modal-title" id="exampleModalLabel">Cart</h5>
+							        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="document.location.reload(true)">
+							          <span aria-hidden="true">&times;</span>
+							        </button>
+							      </div>
+							      <div class="modal-body">
+								  
+	  									<section>
+                                               <div class="row" id="shippingTable">
+												
+												
+										       </div>
+                                            </section>
+								</div>
+
+												
+												</div>
+											
+       
+                                          </div>
+											
+                                     </div>
+                                     
+                             <!-- Modal foodItemCart -->
+							<div class="modal fade" id="foodItemCart" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+							  <div class="modal-dialog modal-lg" role="document">
+							    <div class="modal-content">
+							      <div class="modal-header">
+							        <h5 class="modal-title" id="exampleModalLabel">Cart</h5>
+							        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="document.location.reload(true)">
+							          <span aria-hidden="true">&times;</span>
+							        </button>
+							      </div>
+							      <div class="modal-body">
+								  
+	  									<table  class="table table-bordered dt-responsive nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                                            <thead>
+					                            <tr>
+													<th scope="col">Food Item ID</th>
+													<th scope="col">Food Item Name</th>
+													<th scope="col">Quantity</th>
+													<th scope="col">Total</th>
+												</tr>
+                                            </thead>
+        
+        
+                                            <tbody id="foodItemOrderTable">
+                                            
+                                             
+                                            
+                                            </tbody>
+                                        </table>
+								</div>
+
+												
+												</div>
+											
+       
+                                          </div>
+											
+                                     </div>     
+                                     
+                                     
+                                      <!-- Modal promoCart -->
+							<div class="modal fade" id="promoCart" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+							  <div class="modal-dialog modal-lg" role="document">
+							    <div class="modal-content">
+							      <div class="modal-header">
+							        <h5 class="modal-title" id="exampleModalLabel">Cart</h5>
+							        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="document.location.reload(true)">
+							          <span aria-hidden="true">&times;</span>
+							        </button>
+							      </div>
+							      <div class="modal-body">
+								  
+	  									<table class="table table-bordered dt-responsive nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                                            <thead>
+					                            <tr>
+													<th scope="col">Promo ID</th>
+													<th scope="col">Promo Name</th>
+													<th scope="col">Quantity</th>
+													<th scope="col">Discount</th>
+													<th scope="col">Total</th>
+												</tr>
+                                            </thead>
+        
+        
+                                            <tbody id="promoOrderTable">
+                                            
+                                             
+                                            
+                                            </tbody>
+                                        </table>
+								</div>
+
+												
+												</div>
+											
+       
+                                          </div>
+											
+                                     </div> 
+                                     
+                                     
+                                     
+                                      <!-- Modal promoCart -->
+							<div class="modal fade" id="invoiceCart" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+							  <div class="modal-dialog modal-lg" role="document">
+							    <div class="modal-content">
+							      <div class="modal-header">
+							        <h5 class="modal-title" id="exampleModalLabel">Cart</h5>
+							        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="document.location.reload(true)">
+							          <span aria-hidden="true">&times;</span>
+							        </button>
+							      </div>
+							      <div class="modal-body">
+								  
+	  									
+	  									
+	  					<div class="row" id="invoiceRow">
+                            <div class="col-lg-12">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="invoice-title">
+                                            <h4 class="float-end font-size-16"><span class="badge bg-success font-size-12 ms-2">Paid</span></h4>
+                                            <div class="mb-4">
+                                                <img src="<spring:url value="/resources/siteImage/179318170_113551484199111_2156489937883709937_n.jpg"/>" alt="logo" height="100" width="100"/>
+                                            </div>
+                                            <div class="text-muted">
+                                                <p class="mb-1">Henry Bakers</p>
+                                                <p class="mb-1"><i class="uil uil-envelope-alt me-1"></i> henrybakers010@gmail.com</p>
+                                                <p><i class="uil uil-phone me-1"></i> +94 703644626</p>
+                                            </div>
+                                        </div>
+
+                                        <hr class="my-4">
+
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <div class="text-muted" id="customerOrderDetails">
+                                                   
+                                                   
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <div class="text-muted text-sm-end" id="invoiceDetails">
+                                                    
+                                                    
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        
+                                        <div class="py-2">
+                                            <h5 class="font-size-15">Order summary</h5>
+
+                                            <div class="table-responsive">
+                                                <table class="table table-nowrap table-centered mb-0">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 70px;">No.</th>
+                                                            <th>Food Item Name</th>
+                                                            <th>Price</th>
+                                                            <th>Quantity</th>
+                                                            <th>Discount</th>
+                                                            <th class="text-end" style="width: 120px;">Total</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="invoiceFoodItem">
+                                                        
+                                                       
+                                                    </tbody>
+                                                </table>                                                
+                                            </div>
+                                            
+                                            <div class="table-responsive">
+                                            <table class="table table-nowrap table-centered mb-0">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 70px;"></th>
+                                                            <th></th>
+                                                            <th></th>
+                                                            <th></th>
+                                                            <th class="text-end" style="width: 120px;"></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="invoiceOrderDetails">
+
+                                                       
+                                                    </tbody>
+                                                    
+                                                </table>
+                                            </div>
+                                            
+                                            <div class="d-print-none mt-4">
+                                                <div class="float-end">
+                                                    <a href="javascript:window.print()" class="btn btn-success waves-effect waves-light me-1"><i class="fa fa-print"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+	  									
+	  									
+								</div>
+
+												
+												</div>
+											
+       
+                                          </div>
+											
+                                     </div>      
+            
+            
+            
+            
+            
           </div>
         </div>
       </div>
@@ -794,6 +1417,12 @@ c0-7.4,3.4-18.8,18.8-18.8h13.8v15.4H75.5z"></path></svg></span>
     <!-- parsleyjs -->
 	<script type="text/javascript" src="<spring:url value="/resources/libs/parsleyjs/parsley.min.js"/>"></script>
 	<script type="text/javascript" src="<spring:url value="/resources/js/pages/form-validation.init.js"/>"></script>
+	
+	 <!-- Sweet Alerts js -->
+     <script type="text/javascript" src="<spring:url value="/resources/libs/sweetalert2/sweetalert2.min.js"/>"></script>
+
+     <!-- Sweet alert init js-->
+     <script type="text/javascript" src="<spring:url value="/resources/js/pages/sweet-alerts.init.js"/>"></script>
       
   </body>
 </html>

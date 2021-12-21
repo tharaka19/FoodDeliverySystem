@@ -35,7 +35,6 @@ public class CategoryService implements CategoryBd{
 
 	/**
 	 * get all category details
-	 * @return category list
 	 */
 	@Override
 	public List<Category> getAll() {
@@ -44,8 +43,6 @@ public class CategoryService implements CategoryBd{
 
 	/**
 	 * get category details by category id
-	 * @param id
-	 * @return category
 	 */
 	@Override
 	public Category getById(int id) {
@@ -54,8 +51,6 @@ public class CategoryService implements CategoryBd{
 
 	/**
 	 * get active category details by category status
-	 * @param status
-	 * @return category list
 	 */
 	@Override
 	public List<Category> getAllByStatus(String status) {
@@ -66,7 +61,7 @@ public class CategoryService implements CategoryBd{
 	 * update category details
 	 */
 	@Override
-	public void update(Category category) {
+	public void update(Category category) {	
 		//set category status
 		category.setStatus(categoryRepository.getById(category.getId()).getStatus());
 		categoryRepository.update(category);
@@ -96,8 +91,4 @@ public class CategoryService implements CategoryBd{
 		categoryRepository.delete(categoryRepository.getById(id));
 	}
 
-
-
-	
-	
 }

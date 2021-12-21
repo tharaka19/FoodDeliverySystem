@@ -35,7 +35,6 @@ public class FoodItemService implements FoodItemBd {
 
 	/**
 	 * get all food item details
-	 * @return food item list
 	 */
 	@Override
 	public List<FoodItem> getAll() {
@@ -44,8 +43,6 @@ public class FoodItemService implements FoodItemBd {
 
 	/**
 	 * get food item details by food item id
-	 * @param id
-	 * @return food item
 	 */
 	@Override
 	public FoodItem getById(int id) {
@@ -54,8 +51,6 @@ public class FoodItemService implements FoodItemBd {
 	
 	/**
 	 * get active food item details by food item status
-	 * @param status
-	 * @return food item list
 	 */
 	@Override
 	public List<FoodItem> getAllByStatus(String status) {
@@ -64,8 +59,6 @@ public class FoodItemService implements FoodItemBd {
 	
 	/**
 	 * get food item quantity by food item id
-	 * @param status
-	 * @return food item quantity
 	 */
 	@Override
 	public int getQuantityById(int id) {
@@ -74,8 +67,6 @@ public class FoodItemService implements FoodItemBd {
 	
 	/**
 	 * get active food item details by food item status and category id
-	 * @param status
-	 * @return food item list
 	 */
 	@Override
 	public List<FoodItem> getAllByStatusAndCategoryId(String status, int id) {
@@ -139,7 +130,7 @@ public class FoodItemService implements FoodItemBd {
 		//get food item details by food item id
 		foodItem = foodItemRepository.getById(id);
 		
-		//set food item status
+		//set food item quantity
 		foodItem.setQuantity(quantity);
 		
 		foodItemRepository.update(foodItem);
@@ -152,19 +143,5 @@ public class FoodItemService implements FoodItemBd {
 	public void delete(int id) {
 		foodItemRepository.delete(foodItemRepository.getById(id));
 	}
-
-
-
-
-
-
-
-	
-
-	
-
-	
-
-
 
 }

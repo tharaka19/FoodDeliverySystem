@@ -22,12 +22,16 @@
 	<link rel="stylesheet" id="bootstrap-style" href="<spring:url value="/resources/libs/select2/css/select2.min.css"/> ">
 	<!-- dropzone css -->
 	<link rel="stylesheet" id="bootstrap-style" href="<spring:url value="/resources/libs/dropzone/min/dropzone.min.css"/> ">
+	<!-- Sweet Alert-->
+	<link rel="stylesheet" id="bootstrap-style" href="<spring:url value="/resources/libs/sweetalert2/sweetalert2.min.css"/> ">
 	<!-- Bootstrap Css -->
 	<link rel="stylesheet" id="bootstrap-style" href="<spring:url value="/resources/css/bootstrap.min.css"/> ">
 	<!-- Icons Css -->
 	<link rel="stylesheet" href="<spring:url value="/resources/css/icons.min.css"/> ">
 	<!-- App Css-->
 	<link rel="stylesheet" id="app-style" href="<spring:url value="/resources/css/app.min.css"/> ">
+	
+	<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	
 	<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -37,12 +41,15 @@
 
 	$(document).ready(function() {
 		getAllrecord();
+		var imageVal;
 	});
 
 	function addNewCategoryBtn(){
 		$('#saveCategoryBtn').show();
 		$('#updateCategoryBtn').hide();
 		$('#idfield').hide();
+		$('#imageField').show();
+		$('#updateImageField').hide();
 	}
 	
 	function saveCategory() {
@@ -63,15 +70,21 @@
 					
 				},
 				success : function(result) {
-					getAllrecord()
+			
 				},
 				error : function(err) {
-					alert("error is" + err)
+
 				}
-			}); 
+			});
 			
-		} 
-				
+			Swal.fire({
+				  position: 'top-end',
+				  icon: 'success',
+				  title: 'Your work has been saved',
+				  showConfirmButton: false,
+				  timer: 3000
+				}) 
+		} 	
 	}
     
 	function getAllrecord() {
@@ -96,7 +109,7 @@
 										+ '<td>' + data[i].description + '</td>'
 										+ '<td>  <img src="<spring:url value="/resources/siteImage/' + data[i].image + '"/>"  width="50" height="50"> </td>'
 										+ '<td>  <div id="activeLable" class="badge bg-pill bg-soft-success font-size-12">'+ data[i].status +'</div> </td>'
-										+ '<td>  <input type="button" id="deactiveBtn" class="btn btn-outline-info waves-effect waves-light" onclick="deactiveCategory('+ data[i].id + ')" value="Deactive"></input></td>'
+										+ '<td>  <input type="button" id="sa-basic" class="btn btn-outline-info waves-effect waves-light" onclick="deactiveCategory('+ data[i].id + ')" value="Deactive"></input></td>'
 										+ '<td>  <input type="button" class="btn btn-outline-warning waves-effect waves-light" onclick="editCategory('+ data[i].id + ')" data-toggle="modal" data-target="#cart" value="Edit"></input></td>'
 										+ '<td>  <input type="button" class="btn btn-outline-danger waves-effect waves-light" onclick="deleteCategory(' + data[i].id + ')" value="Delete"></input></td>'
 										+ '</tr>');
@@ -115,9 +128,9 @@
 										'<tr class="tr">'
 										+ '<td>' + data[i].id + '</td>'
 										+ '<td>' + data[i].name + '</td>'
-										+ '<td>' + data[i].description + '</td>'
+										+ '<td>' + data[i].description + '</td>'                                                   
 										+ '<td>  <img src="<spring:url value="/resources/siteImage/' + data[i].image + '"/>" width="50" height="50"> </td>'
-										+ '<td>  <div id="deactiveLable" class="badge bg-pill bg-soft-danger font-size-12">'+ data[i].status +'</div> </td>'
+										+ '<td>  <div id="sa-basic" class="badge bg-pill bg-soft-danger font-size-12">'+ data[i].status +'</div> </td>'
 										+ '<td>  <input type="button" id="activeBtn" class="btn btn-outline-info waves-effect waves-light" onclick="activeCategory('+ data[i].id + ')" value="Active"></input></td>'
 										+ '<td>  <input type="button" class="btn btn-outline-warning waves-effect waves-light" onclick="editCategory('+ data[i].id + ')" data-toggle="modal" data-target="#cart" value="Edit"></input></td>'
 										+ '<td>  <input type="button" class="btn btn-outline-danger waves-effect waves-light" onclick="deleteCategory(' + data[i].id + ')" value="Delete"></input></td>'
@@ -216,6 +229,8 @@
 		$('#saveCategoryBtn').hide();
 		$('#updateCategoryBtn').show();
 		$('#idfield').show();
+		$('#imageField').hide();
+		$('#updateImageField').show();
 		
 		$.ajax({
 			type : "GET",
@@ -223,11 +238,10 @@
 			dataType : 'json',
 			success : function(response) {
 
-				//alert("student--"+response.id);
 				$("#id").val(response.id),
 				$("#name").val(response.name),
 				$("#description").val(response.description),
-				$("#image").val(response.image)
+				imageVal = response.image
 
 			},
 			error : function(err) {
@@ -238,44 +252,125 @@
 
 	function updateCategory() {
 
-		if($("#name").val() == "" || $("#description").val() == "" || $("#image").val() == ""){
-			//alert("faild");
-		}else{
+				  if($("#name").val() == "" || $("#description").val() == ""){
+						//alert("faild");
+					}else if($("#updateImage").val() == ""){
 
-			$.ajax({
-				type : "POST",
-				url : "Category/updateCategory",
-				data : {
-					
-					id : $("#id").val(),
-					name : $("#name").val(),
-					description : $("#description").val(),
-					image : $("#image").val()
-					
-				},
-				success : function(result) {				
-					getAllrecord()
-				},
-				error : function(err) {
-					alert("error is" + err)
-				}
-			});
-				
-		}
+						Swal.fire({
+							  title: 'Are you sure?',
+							  text: "You won't be able to revert this!",
+							  icon: 'warning',
+							  showCancelButton: true,
+							  confirmButtonColor: '#3085d6',
+							  cancelButtonColor: '#d33',
+							  confirmButtonText: 'Yes, update it!'
+							}).then((result) => {
+							  if (result.isConfirmed) {
+
+
+								  $.ajax({
+										type : "POST",
+										url : "Category/updateCategory",
+										data : {
+											
+											id : $("#id").val(),
+											name : $("#name").val(),
+											description : $("#description").val(),
+											image : imageVal
+											
+										},
+										success : function(result) {				
+											getAllrecord(),
+											document.location.reload(true)
+										},
+										error : function(err) {
+											alert("error is" + err)
+										}
+									});
+								  
+							    Swal.fire(
+							      'Updated!',
+							      'Your file has been updated.',
+							      'success'
+							    )
+							  }
+							})
+						
+					}else if($("#updateImage").val() != ""){
+
+						Swal.fire({
+							  title: 'Are you sure?',
+							  text: "You won't be able to revert this!",
+							  icon: 'warning',
+							  showCancelButton: true,
+							  confirmButtonColor: '#3085d6',
+							  cancelButtonColor: '#d33',
+							  confirmButtonText: 'Yes, update it!'
+							}).then((result) => {
+							  if (result.isConfirmed) {
+
+								  $.ajax({
+										type : "POST",
+										url : "Category/updateCategory",
+										data : {
+											
+											id : $("#id").val(),
+											name : $("#name").val(),
+											description : $("#description").val(),
+											image : $("#updateImage").val()
+											
+										},
+										success : function(result) {				
+											getAllrecord(),
+											document.location.reload(true)
+										},
+										error : function(err) {
+											alert("error is" + err)
+										}
+									});
+								  
+							    Swal.fire(
+							      'Updated!',
+							      'Your file has been updated.',
+							      'success'
+							    )
+							  }
+							})
+					}  
+
 	}
 
 	function deleteCategory(id) {
-		
-		$.ajax({
-			type : "GET",
-			url : "Category/deleteCategory/" + id,
-			success : function(response) {
-				getAllrecord()
-			},
-			error : function(err) {
-				alert("error is" + err)
-			}
-		});
+
+		Swal.fire({
+			  title: 'Are you sure?',
+			  text: "You won't be able to revert this!",
+			  icon: 'warning',
+			  showCancelButton: true,
+			  confirmButtonColor: '#3085d6',
+			  cancelButtonColor: '#d33',
+			  confirmButtonText: 'Yes, delete it!'
+			}).then((result) => {
+			  if (result.isConfirmed) {
+
+					$.ajax({
+						type : "GET",
+						url : "Category/deleteCategory/" + id,
+						success : function(response) {
+							getAllrecord()
+						},
+						error : function(err) {
+							alert("error is" + err)
+						}
+					});
+				  
+			    Swal.fire(
+			      'Deleted!',
+			      'Your file has been deleted.',
+			      'success'
+			    )
+			  }
+			})
 	}
 
 
@@ -298,6 +393,8 @@
      	}
 		
 		%>
+	
+	
 	
 	<div id="layout-wrapper">
 		<header id="page-topbar">
@@ -323,71 +420,27 @@
 							<input type="text" class="form-control" placeholder="Search..."> <span class="uil-search"></span> </div>
 					</form>
 				</div>
+				
 				<div class="d-flex">
-					<div class="dropdown d-inline-block d-lg-none ms-2">
-						<button type="button" class="btn header-item noti-icon waves-effect" id="page-header-search-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="uil-search"></i> </button>
-						<div class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0" aria-labelledby="page-header-search-dropdown">
-							<form class="p-3">
-								<div class="m-0">
-									<div class="input-group">
-										<input type="text" class="form-control" placeholder="Search ..." aria-label="Recipient's username">
-										<div class="input-group-append">
-											<button class="btn btn-primary" type="submit"><i class="mdi mdi-magnify"></i></button>
-										</div>
-									</div>
-								</div>
-							</form>
-						</div>
-					</div>
 					
-					<div class="dropdown d-none d-lg-inline-block ms-1">
-						<button type="button" class="btn header-item noti-icon waves-effect" data-bs-toggle="fullscreen"> <i class="uil-minus-path"></i> </button>
-					</div>
-					<div class="dropdown d-inline-block">
-						<button type="button" class="btn header-item noti-icon waves-effect" id="page-header-notifications-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="uil-bell"></i> <span class="badge bg-danger rounded-pill">3</span> </button>
-						<div class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0" aria-labelledby="page-header-notifications-dropdown">
-							<div class="p-3">
-								<div class="row align-items-center">
-									<div class="col">
-										<h5 class="m-0 font-size-16"> Notifications </h5> </div>
-									<div class="col-auto"> <a href="#!" class="small"> Mark all as read</a> </div>
-								</div>
-							</div>
-							<div data-simplebar style="max-height: 230px;">
-								
-								
-							</div>
-							<div class="p-2 border-top">
-								<div class="d-grid">
-									<a class="btn btn-sm btn-link font-size-14 text-center" href="javascript:void(0)"> <i class="uil-arrow-circle-right me-1"></i> View More.. </a>
-								</div>
-							</div>
-						</div>
-					</div>
 					
 					<div class="dropdown d-inline-block">
-						<button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <img class="rounded-circle header-profile-user" src="assets/images/users/avatar-4.jpg" alt="Header Avatar"> <span class="d-none d-xl-inline-block ms-1 fw-medium font-size-15"><% out.print(name);%></span> <i class="uil-angle-down d-none d-xl-inline-block font-size-15"></i> </button>
+						<a href="./Profile"><button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <img class="rounded-circle header-profile-user" src="<spring:url value="/resources/images/xxxmin.jpg"/>" alt="Header Avatar"> <span class="d-none d-xl-inline-block ms-1 fw-medium font-size-15"><% out.print(name);%></span> <i class="uil-angle-down d-none d-xl-inline-block font-size-15"></i> </button></a>
 						<div class="dropdown-menu dropdown-menu-end">
 							<!-- item--><a class="dropdown-item" href="#"><i class="uil uil-user-circle font-size-18 align-middle text-muted me-1"></i> <span class="align-middle">View Profile</span></a> <a class="dropdown-item" href="#"><i class="uil uil-wallet font-size-18 align-middle me-1 text-muted"></i> <span class="align-middle">My Wallet</span></a> <a class="dropdown-item d-block" href="#"><i class="uil uil-cog font-size-18 align-middle me-1 text-muted"></i> <span class="align-middle">Settings</span> <span class="badge bg-soft-success rounded-pill mt-1 ms-2">03</span></a> <a class="dropdown-item" href="#"><i class="uil uil-lock-alt font-size-18 align-middle me-1 text-muted"></i> <span class="align-middle">Lock screen</span></a> <a class="dropdown-item" href="#"><i class="uil uil-sign-out-alt font-size-18 align-middle me-1 text-muted"></i> <span class="align-middle">Sign out</span></a> </div>
+					</div>
+					<div class="dropdown d-inline-block">
+						<button type="button" class="btn header-item noti-icon right-bar-toggle waves-effect"> <i class="uil-cog"></i> </button>
 					</div>
 				</div>
 			</div>
 		</header>
 		<!-- ========== Left Sidebar Start ========== -->
+		
+		
 		<div class="vertical-menu">
 			<!-- LOGO -->
-			<div class="navbar-brand-box">
-				<a href="index.html" class="logo logo-dark"> <span class="logo-sm">
-                            <img src="assets/images/logo-sm.png" alt="" height="22">
-                        </span> <span class="logo-lg">
-                            <img src="assets/images/logo-dark.png" alt="" height="20">
-                        </span> </a>
-				<a href="index.html" class="logo logo-light"> <span class="logo-sm">
-                            <img src="assets/images/logo-sm.png" alt="" height="22">
-                        </span> <span class="logo-lg">
-                            <img src="assets/images/logo-light.png" alt="" height="20">
-                        </span> </a>
-			</div>
+
 			<button type="button" class="btn btn-sm px-3 font-size-16 header-item waves-effect vertical-menu-btn"> <i class="fa fa-fw fa-bars"></i> </button>
 			<div data-simplebar class="sidebar-menu-scroll">
 				<!--- Sidemenu -->
@@ -396,47 +449,37 @@
 					<ul class="metismenu list-unstyled" id="side-menu">
 						<li class="menu-title">Menu</li>
 						<li>
-							<a href="./"> <i class="uil-home-alt"></i><span class="badge rounded-pill bg-primary float-end">01</span> <span>Dashboard</span> </a>
+							<a href="./Home"> <i class="uil-home-alt"></i><span class="badge rounded-pill bg-primary float-end">01</span> <span>Dashboard</span> </a>
 						</li>
-						<li>
-							<a href="javascript: void(0);" class="has-arrow waves-effect"> <i class="uil-window-section"></i> <span>Layouts</span> </a>
-							<ul class="sub-menu" aria-expanded="true">
-								
-										<li><a href="layouts-dark-sidebar.html">Dark Sidebar</a></li>
-										<li><a href="layouts-colored-sidebar.html">Colored Sidebar</a></li>
-										
-							</ul>
-						</li>
+		
 						<li class="menu-title">Apps</li>
+					
 						<li>
-							<a href="calendar.html" class="waves-effect"> <i class="uil-calender"></i> <span>Calendar</span> </a>
+							<a href="./Customer" class="waves-effect"> <i class="uil-calender"></i> <span>Customers</span> </a>
+						</li>
+						<li>
+							<a href="./Order" class="waves-effect"> <i class="uil-calender"></i> <span>Orders</span> </a>
+						</li>
+						<li>
+							<a href="./Payment" class="waves-effect"> <i class="uil-calender"></i> <span>Payment</span> </a>
+						</li>
+						<li>
+							<a href="./Income" class="waves-effect"> <i class="uil-calender"></i> <span>Income</span> </a>
+						</li>
+						<li>
+							<a href="./Email" class="waves-effect"> <i class="uil-calender"></i> <span>Email</span> </a>
 						</li>
 						<li>
 							<a href="javascript: void(0);" class="has-arrow waves-effect"> <i class="uil-store"></i> <span>Ecommerce</span> </a>
 							<ul class="sub-menu" aria-expanded="false">
-								<li><a href="ecommerce-orders.html">Orders</a></li>
-								<li><a href="ecommerce-customers.html">Customers</a></li>
-								<li><a href="./AdminDashbord/Category">Category</a></li>
+								<li><a href="./Category">Category</a></li>
 								<li><a href="./FoodItem">Food Items</a></li>
 								<li><a href="./Promo">Promo</a></li>
 								<li><a href="./PromoFood">Promo Food</a></li>
+								<li><a href="./DeliveryLocation">Delivery Location</a></li>
 							</ul>
 						</li>
-						<li>
-							<a href="javascript: void(0);" class="has-arrow waves-effect"> <i class="uil-invoice"></i> <span>Invoices</span> </a>
-							<ul class="sub-menu" aria-expanded="false">
-								<li><a href="invoices-list.html">Invoice List</a></li>
-								<li><a href="invoices-detail.html">Invoice Detail</a></li>
-							</ul>
-						</li>
-						<li>
-							<a href="javascript: void(0);" class="has-arrow waves-effect"> <i class="uil-book-alt"></i> <span>Contacts</span> </a>
-							<ul class="sub-menu" aria-expanded="false">
-								<li><a href="contacts-grid.html">User Grid</a></li>
-								<li><a href="contacts-list.html">User List</a></li>
-								<li><a href="contacts-profile.html">Profile</a></li>
-							</ul>
-						</li>
+			
 						
 					
 					</ul>
@@ -465,7 +508,8 @@
 							</div>
 						</div>
 					</div>
-					<!-- end page title -->
+					<!-- end page title -->					
+					
 					<div class="row">
 						<div class="col-lg-12">
 							<div id="addproduct-accordion" class="custom-accordion">
@@ -487,16 +531,21 @@
 											</div>
 										</div>
 									</a>
+									
+									
+									
 									<div id="addproduct-billinginfo-collapse" class="collapse show" data-bs-parent="#addproduct-accordion">
 										<div class="p-4 border-top">
 											<button type="button" class="btn btn-success waves-effect waves-light mb-3" data-toggle="modal" data-target="#cart" onclick="addNewCategoryBtn()"><i class="mdi mdi-plus me-1"></i> Add New Category</button>
 										<div class="container mt-3">
 
+                                                    
+									 
 									 
                                         <table id="datatable" class="table table-bordered dt-responsive nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                                             <thead>
 					                            <tr>
-													<th scope="col">ID</th>
+													<th scope="col">#C_ID</th>
 													<th scope="col">Name</th>
 													<th scope="col">Description</th>
 													<th scope="col">Image</th>
@@ -541,7 +590,7 @@
 															<div class="col"></div>
 															<div class="col">
 															<div class="mb-3">
-																	<label for="id">ID</label>
+																	<label for="id">#C_ID</label>
 																	<input type="text" readonly="readonly" class="form-control" id="id" name="id">
 																</div>
 															</div>
@@ -577,7 +626,7 @@
 															<div class="col"></div>
 														</div>
 									
-														<div class="row">
+														<div class="row" id="imageField">
 														    <div class="col"></div>
 															<div class="col">
 																<div class="mb-3">
@@ -586,6 +635,17 @@
 																	<div class="invalid-feedback">
 																		Please provide a valid image.
 																	</div>
+																</div>
+															</div>
+															<div class="col"></div>
+														</div>
+														
+														<div class="row" id="updateImageField">
+														    <div class="col"></div>
+															<div class="col">
+																<div class="mb-3">
+																	<label class="form-label" for="validationCustom03">Image</label><br>
+																	 <input type="file" class="form-control" accept="image/*"  name="updateImage" id="updateImage">
 																</div>
 															</div>
 															<div class="col"></div>
@@ -613,9 +673,7 @@
 										
        
                                        </div>
-											<div class="modal-footer">
-												
-											</div>
+											
                                     </div>
 									
 								</div>
@@ -753,6 +811,12 @@
 	<!-- Table Editable plugin -->
 	<script type="text/javascript" src="<spring:url value="/resources/libs/table-edits/build/table-edits.min.js"/>"></script>
 	<script type="text/javascript" src="<spring:url value="/resources/js/pages/table-editable.int.js"/>"></script>
+	
+	 <!-- Sweet Alerts js -->
+     <script type="text/javascript" src="<spring:url value="/resources/libs/sweetalert2/sweetalert2.min.js"/>"></script>
+
+     <!-- Sweet alert init js-->
+     <script type="text/javascript" src="<spring:url value="/resources/js/pages/sweet-alerts.init.js"/>"></script>
   
 	<!-- App js -->
 	<script type="text/javascript" src="<spring:url value="/resources/js/app.js"/>"></script>

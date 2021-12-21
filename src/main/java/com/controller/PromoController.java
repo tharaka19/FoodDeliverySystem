@@ -1,4 +1,4 @@
-package com.controller;
+package com.Controller;
 
 import java.util.List;
 
@@ -145,4 +145,5 @@ public class PromoController {
 		promoService.delete(id);
 		return "deleted";
 	}
+	
 }

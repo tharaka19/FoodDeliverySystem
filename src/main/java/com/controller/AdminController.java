@@ -1,4 +1,4 @@
-package com.controller;
+package com.Controller;
 
 import java.io.IOException;
 
@@ -10,10 +10,13 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.Entity.Admin;
@@ -50,9 +53,8 @@ public class AdminController {
 		}else {
 			//save new admin
 			adminService.save(admin);
-			return "admin";
-		}
-		
+			return "Your account has been created successlly";
+		}	
 	}
 	
 	/**
@@ -74,18 +76,56 @@ public class AdminController {
 			//get admin details by admin email
 			session.setAttribute("admin", adminService.getByEmail(admin.getEmail()));
 
-			RequestDispatcher rd = request.getRequestDispatcher("AdminDashbord");
+			RequestDispatcher rd = request.getRequestDispatcher("AdminDashbord/Index");
 			rd.forward(request, response);
 		
 		}else {
-			System.out.println("cannot login");
+			String status="email or password inccorect";
+			System.out.println(status);
+			
+			request.setAttribute("status", status);
 			
 			RequestDispatcher rd = request.getRequestDispatcher("/AdminLogin");
 			rd.forward(request, response);
-		}
-				
+		}		
 	}
 	
+	/**
+	 * get admin details by admin id
+	 * @param id
+	 * @param session
+	 */
+	@GetMapping("/AdminDashbord/Profile/getAdmin/{id}")
+	@ResponseBody
+	public void getById(@PathVariable int id, HttpSession session){
+		System.out.println("controller");
+		session.setAttribute("admin", adminService.getById(id));
+	}
+	
+	/**
+	 * check existing password by admin id
+	 * @param currentPassword
+	 * @param id
+	 * @return
+	 */
+	@PostMapping("/AdminDashbord/Profile/checkPassword")
+	@ResponseBody
+	public boolean checkPassword(@RequestParam("currentPassword") String currentPassword, @RequestParam("id") int id){
+		return adminService.checkPassword(currentPassword,id);
+	}
+	
+	/**
+	 * update password by admin id
+	 * @param password
+	 * @param id
+	 * @return
+	 */
+	@PostMapping("/AdminDashbord/Profile/updatePassword")
+	@ResponseBody
+	public boolean savePassword(@RequestParam("password") String password, @RequestParam("id") int id){
+		adminService.updatePassword(password, id);
+		return true;
+	}
 	
 	
 }

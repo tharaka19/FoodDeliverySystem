@@ -22,12 +22,16 @@
 	<link rel="stylesheet" id="bootstrap-style" href="<spring:url value="/resources/libs/select2/css/select2.min.css"/> ">
 	<!-- dropzone css -->
 	<link rel="stylesheet" id="bootstrap-style" href="<spring:url value="/resources/libs/dropzone/min/dropzone.min.css"/> ">
+	<!-- Sweet Alert-->
+	<link rel="stylesheet" id="bootstrap-style" href="<spring:url value="/resources/libs/sweetalert2/sweetalert2.min.css"/> ">
 	<!-- Bootstrap Css -->
 	<link rel="stylesheet" id="bootstrap-style" href="<spring:url value="/resources/css/bootstrap.min.css"/> ">
 	<!-- Icons Css -->
 	<link rel="stylesheet" href="<spring:url value="/resources/css/icons.min.css"/> ">
 	<!-- App Css-->
 	<link rel="stylesheet" id="app-style" href="<spring:url value="/resources/css/app.min.css"/> ">
+	
+	<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	
 	<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -36,7 +40,7 @@
 	<script>
 
 	$(document).ready(function() {
-		getAllPrmoFood()
+		getAllPrmoFood();
 	});
 
 	let promoQuantity='';
@@ -172,8 +176,13 @@
 			success : function(result) {
 	
 				if(result == true){
-
-						alert("food item was added");
+					  Swal.fire({
+						  icon: 'error',
+						  title: 'Oops...',
+						  text: 'Food item was added!',
+						  footer: 'Select a another food item'
+						});
+						
 						$("#foodItemNameList").val('');
 						$("#availableFoodQuantity").val('');
 						foodQuantity = '';
@@ -230,27 +239,39 @@
 	}
 	
 	function savePromoFood() {
+		if($("#promoNameList").val() == "" || $("#foodItemNameList").val() == "" || $('input[name="quantity"]').val()  == ""){
+			//alert("faild");
+		}else{
 
-		updateFoodItemQuantity($("#foodItemNameList").val(), $("#availableFoodQuantity").val());
-		
-		$.ajax({
-			type : "POST",
-			url : "PromoFood/savePromoFood",
-			data : {
+			updateFoodItemQuantity($("#foodItemNameList").val(), $("#availableFoodQuantity").val());
+			
+			$.ajax({
+				type : "POST",
+				url : "PromoFood/savePromoFood",
+				data : {
 
-				promoId  : $("#promoNameList").val(),
-			    foodItemId  : $("#foodItemNameList").val(),
-			    foodQuantity : $('input[name="quantity"]').val(),
-			    status : "Active",
-					
-			 },
-			success : function(result) {
-				getAllPromoFood()
-			},
-			error : function(err) {
-				alert("error is" + err)
-			}
-		}); 
+					promoId  : $("#promoNameList").val(),
+				    foodItemId  : $("#foodItemNameList").val(),
+				    foodQuantity : $('input[name="quantity"]').val(),
+				    status : "Active",
+						
+				 },
+				success : function(result) {
+					getAllPromoFood()
+				},
+				error : function(err) {
+
+				}
+			}); 
+
+			Swal.fire({
+				  position: 'top-end',
+				  icon: 'success',
+				  title: 'Your work has been saved',
+				  showConfirmButton: false,
+				  timer: 3000
+				})
+		}
 		
 	}
 
@@ -269,7 +290,7 @@
 
 			},
 			error : function(err) {
-				alert("error is" + err)
+
 			}
 		});
 	}
@@ -297,8 +318,8 @@
 												        + '<td>' + data[i].foodQuantity + '</td>'
 												        + '<td>  <div class="badge bg-pill bg-soft-success font-size-12"">'+ data[i].status +'</div>  </td>'
 														+ '<td>  <input type="button" id="deactiveBtn" class="btn btn-outline-info waves-effect waves-light" onclick="deactivePromoFood('+ data[i].id + ')" value="Deactive"></input></td>'
-												        + '<td>  <input type="button" class="btn btn-outline-warning waves-effect waves-light" onclick="editPromoFood('+ data[i].id + ')" data-toggle="modal" data-target="#cartTwo" value="Edit"></input></td>'
-												        + '<td>  <input type="button" class="btn btn-outline-danger waves-effect waves-light" onclick="deletePromoFood(' + data[i].id + ')" value="Delete"></input></td>'
+												        + '<td>  <input type="button" class="btn btn-outline-warning waves-effect waves-light" onclick="editPromoFood('+ data[i].id + ')" data-toggle="modal" data-target="#cart" value="Edit"></input></td>'
+												        + '<td>  <input type="button" class="btn btn-outline-danger waves-effect waves-light" onclick="deletePromoFood(' + data[i].id +','+data[i].foodItem.id+',' +data[i].promo.quantity+ ',' +data[i].foodQuantity+','+data[i].foodItem.quantity+ ')" value="Delete"></input></td>'
 												        + '</tr>');
 								        
 										$("#infoTable")
@@ -320,7 +341,7 @@
 												        + '<td>' + data[i].foodQuantity + '</td>'
 												        + '<td>  <div class="badge bg-pill bg-soft-danger font-size-12">'+ data[i].status +'</div>  </td>'
 														+ '<td>  <input type="button" id="activeBtn" class="btn btn-outline-info waves-effect waves-light" onclick="activePromoFood('+ data[i].id + ')" value="Active"></input></td>'
-												        + '<td>  <input type="button" class="btn btn-outline-warning waves-effect waves-light" onclick="editPromoFood('+ data[i].id + ')" data-toggle="modal" data-target="#cartTwo" value="Edit"></input></td>'
+												        + '<td>  <input type="button" class="btn btn-outline-warning waves-effect waves-light" onclick="editPromoFood('+ data[i].id + ')" data-toggle="modal" data-target="#cart" value="Edit"></input></td>'
 												        + '<td>  <input type="button" class="btn btn-outline-danger waves-effect waves-light" onclick="deletePromoFood(' + data[i].id + ')" value="Delete"></input></td>'
 												        + '</tr>');
 									
@@ -330,8 +351,8 @@
 
 							},
 							error : function(err) {
-								alert("error is" + err)
-							}
+
+							} 
 						});
 	}
 
@@ -377,8 +398,7 @@
 				
 	}
 
-	function editPromoFood(id) {
-
+	function editPromoFood(id) {		
 		$('#savePromoFoodBtn').hide();
 		$('#updatePromoFoodBtn').show();
 		$('#promoFoodIdField').show();
@@ -403,46 +423,84 @@
 
 			},
 			error : function(err) {
-				alert("error is" + err)
+
 			}
 		});
 	}
 
 	function updatePromoFood() {
+		
+		if($("#promoNameList").val() == "" || $("#foodItemNameList").val() == "" || $('input[name="quantity"]').val()  == ""){
+			//alert("faild");
+		}else{
 
-		updateFoodItemQuantity($("#foodItemNameList").val(), $("#availableFoodQuantity").val());
+					  updateFoodItemQuantity($("#foodItemNameList").val(), $("#availableFoodQuantity").val());
 
-		 $.ajax({
-			type : "POST",
-			url : "PromoFood/updatePromoFood",
-			data : {
+						 $.ajax({
+							type : "POST",
+							url : "PromoFood/updatePromoFood",
+							data : {
 
-				id : $("#promoFoodId").val(),
-				promoId  : $("#promoNameList").val(),
-			    foodItemId  : $("#foodItemNameList").val(),
-			    foodQuantity : $('input[name="quantity"]').val()
-			    
-			},
-			success : function(result) {
-				getAllPrmoFood()
-			},
-			error : function(err) {
-				alert("error is" + err)
-			}
-		});	
+								id : $("#promoFoodId").val(),
+								promoId  : $("#promoNameList").val(),
+							    foodItemId  : $("#foodItemNameList").val(),
+							    foodQuantity : $('input[name="quantity"]').val()
+							    
+							},
+							success : function(result) {
+								getAllPrmoFood()
+							},
+							error : function(err) {
+
+							}
+						});
+
+						 Swal.fire({
+							  position: 'top-end',
+							  icon: 'success',
+							  title: 'Your work has been updated',
+							  showConfirmButton: false,
+							  timer: 3000
+						}) 					
+
+		}
+	
 	}
 
-	function deletePromoFood(id) {
-		
-		$.ajax({
-			url : "PromoFood/deletePromoFood/" + id,
-			success : function(response) {
-				getAllPrmoFood()
-			},
-			error : function(err) {
-				alert("error is" + err)
-			}
-		});
+	function deletePromoFood(id, foodItemId, promoQuantity, promoFoodItemQuantity, foodItemQuantity) {
+
+		Swal.fire({
+			  title: 'Are you sure?',
+			  text: "You won't be able to revert this!",
+			  icon: 'warning',
+			  showCancelButton: true,
+			  confirmButtonColor: '#3085d6',
+			  cancelButtonColor: '#d33',
+			  confirmButtonText: 'Yes, delete it!'
+			}).then((result) => {
+			  if (result.isConfirmed) {
+
+				  var totalQuantity = (promoQuantity * promoFoodItemQuantity) + foodItemQuantity;
+					
+					updateFoodItemQuantity(foodItemId, totalQuantity);
+					
+					$.ajax({
+						url : "PromoFood/deletePromoFood/" + id,
+						success : function(response) {
+							getAllPrmoFood()
+						},
+						error : function(err) {
+							alert("error is" + err)
+						}
+					});
+				  
+			    Swal.fire(
+			      'Deleted!',
+			      'Your file has been deleted.',
+			      'success'
+			    )
+			  }
+			})
 	}
 
 
@@ -491,52 +549,17 @@
 							<input type="text" class="form-control" placeholder="Search..."> <span class="uil-search"></span> </div>
 					</form>
 				</div>
+				
 				<div class="d-flex">
-					<div class="dropdown d-inline-block d-lg-none ms-2">
-						<button type="button" class="btn header-item noti-icon waves-effect" id="page-header-search-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="uil-search"></i> </button>
-						<div class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0" aria-labelledby="page-header-search-dropdown">
-							<form class="p-3">
-								<div class="m-0">
-									<div class="input-group">
-										<input type="text" class="form-control" placeholder="Search ..." aria-label="Recipient's username">
-										<div class="input-group-append">
-											<button class="btn btn-primary" type="submit"><i class="mdi mdi-magnify"></i></button>
-										</div>
-									</div>
-								</div>
-							</form>
-						</div>
-					</div>
 					
-					<div class="dropdown d-none d-lg-inline-block ms-1">
-						<button type="button" class="btn header-item noti-icon waves-effect" data-bs-toggle="fullscreen"> <i class="uil-minus-path"></i> </button>
-					</div>
-					<div class="dropdown d-inline-block">
-						<button type="button" class="btn header-item noti-icon waves-effect" id="page-header-notifications-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="uil-bell"></i> <span class="badge bg-danger rounded-pill">3</span> </button>
-						<div class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0" aria-labelledby="page-header-notifications-dropdown">
-							<div class="p-3">
-								<div class="row align-items-center">
-									<div class="col">
-										<h5 class="m-0 font-size-16"> Notifications </h5> </div>
-									<div class="col-auto"> <a href="#!" class="small"> Mark all as read</a> </div>
-								</div>
-							</div>
-							<div data-simplebar style="max-height: 230px;">
-								
-								
-							</div>
-							<div class="p-2 border-top">
-								<div class="d-grid">
-									<a class="btn btn-sm btn-link font-size-14 text-center" href="javascript:void(0)"> <i class="uil-arrow-circle-right me-1"></i> View More.. </a>
-								</div>
-							</div>
-						</div>
-					</div>
 					
 					<div class="dropdown d-inline-block">
-						<button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <img class="rounded-circle header-profile-user" src="assets/images/users/avatar-4.jpg" alt="Header Avatar"> <span class="d-none d-xl-inline-block ms-1 fw-medium font-size-15"><% out.print(name);%></span> <i class="uil-angle-down d-none d-xl-inline-block font-size-15"></i> </button>
+						<a href="./Profile"><button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <img class="rounded-circle header-profile-user" src="<spring:url value="/resources/images/xxxmin.jpg"/>" alt="Header Avatar"> <span class="d-none d-xl-inline-block ms-1 fw-medium font-size-15"><% out.print(name);%></span> <i class="uil-angle-down d-none d-xl-inline-block font-size-15"></i> </button></a>
 						<div class="dropdown-menu dropdown-menu-end">
 							<!-- item--><a class="dropdown-item" href="#"><i class="uil uil-user-circle font-size-18 align-middle text-muted me-1"></i> <span class="align-middle">View Profile</span></a> <a class="dropdown-item" href="#"><i class="uil uil-wallet font-size-18 align-middle me-1 text-muted"></i> <span class="align-middle">My Wallet</span></a> <a class="dropdown-item d-block" href="#"><i class="uil uil-cog font-size-18 align-middle me-1 text-muted"></i> <span class="align-middle">Settings</span> <span class="badge bg-soft-success rounded-pill mt-1 ms-2">03</span></a> <a class="dropdown-item" href="#"><i class="uil uil-lock-alt font-size-18 align-middle me-1 text-muted"></i> <span class="align-middle">Lock screen</span></a> <a class="dropdown-item" href="#"><i class="uil uil-sign-out-alt font-size-18 align-middle me-1 text-muted"></i> <span class="align-middle">Sign out</span></a> </div>
+					</div>
+					<div class="dropdown d-inline-block">
+						<button type="button" class="btn header-item noti-icon right-bar-toggle waves-effect"> <i class="uil-cog"></i> </button>
 					</div>
 				</div>
 			</div>
@@ -544,18 +567,7 @@
 		<!-- ========== Left Sidebar Start ========== -->
 		<div class="vertical-menu">
 			<!-- LOGO -->
-			<div class="navbar-brand-box">
-				<a href="index.html" class="logo logo-dark"> <span class="logo-sm">
-                            <img src="assets/images/logo-sm.png" alt="" height="22">
-                        </span> <span class="logo-lg">
-                            <img src="assets/images/logo-dark.png" alt="" height="20">
-                        </span> </a>
-				<a href="index.html" class="logo logo-light"> <span class="logo-sm">
-                            <img src="assets/images/logo-sm.png" alt="" height="22">
-                        </span> <span class="logo-lg">
-                            <img src="assets/images/logo-light.png" alt="" height="20">
-                        </span> </a>
-			</div>
+			
 			<button type="button" class="btn btn-sm px-3 font-size-16 header-item waves-effect vertical-menu-btn"> <i class="fa fa-fw fa-bars"></i> </button>
 			<div data-simplebar class="sidebar-menu-scroll">
 				<!--- Sidemenu -->
@@ -564,47 +576,37 @@
 					<ul class="metismenu list-unstyled" id="side-menu">
 						<li class="menu-title">Menu</li>
 						<li>
-							<a href="./AdminDashbord"> <i class="uil-home-alt"></i><span class="badge rounded-pill bg-primary float-end">01</span> <span>Dashboard</span> </a>
+							<a href="./Home"> <i class="uil-home-alt"></i><span class="badge rounded-pill bg-primary float-end">01</span> <span>Dashboard</span> </a>
 						</li>
-						<li>
-							<a href="javascript: void(0);" class="has-arrow waves-effect"> <i class="uil-window-section"></i> <span>Layouts</span> </a>
-							<ul class="sub-menu" aria-expanded="true">
-								
-										<li><a href="layouts-dark-sidebar.html">Dark Sidebar</a></li>
-										<li><a href="layouts-colored-sidebar.html">Colored Sidebar</a></li>
-										
-							</ul>
-						</li>
+					
 						<li class="menu-title">Apps</li>
+						
 						<li>
-							<a href="calendar.html" class="waves-effect"> <i class="uil-calender"></i> <span>Calendar</span> </a>
+							<a href="./Customer" class="waves-effect"> <i class="uil-calender"></i> <span>Customers</span> </a>
+						</li>
+						<li>
+							<a href="./Order" class="waves-effect"> <i class="uil-calender"></i> <span>Orders</span> </a>
+						</li>
+						<li>
+							<a href="./Payment" class="waves-effect"> <i class="uil-calender"></i> <span>Payment</span> </a>
+						</li>
+						<li>
+							<a href="./Income" class="waves-effect"> <i class="uil-calender"></i> <span>Income</span> </a>
+						</li>
+						<li>
+							<a href="./Email" class="waves-effect"> <i class="uil-calender"></i> <span>Email</span> </a>
 						</li>
 						<li>
 							<a href="javascript: void(0);" class="has-arrow waves-effect"> <i class="uil-store"></i> <span>Ecommerce</span> </a>
 							<ul class="sub-menu" aria-expanded="false">
-								<li><a href="ecommerce-orders.html">Orders</a></li>
-								<li><a href="ecommerce-customers.html">Customers</a></li>
 								<li><a href="./Category">Category</a></li>
 								<li><a href="./FoodItem">Food Items</a></li>
 								<li><a href="./Promo">Promo</a></li>
 								<li><a href="./PromoFood">Promo Food</a></li>
+								<li><a href="./DeliveryLocation">Delivery Location</a></li>
 							</ul>
 						</li>
-						<li>
-							<a href="javascript: void(0);" class="has-arrow waves-effect"> <i class="uil-invoice"></i> <span>Invoices</span> </a>
-							<ul class="sub-menu" aria-expanded="false">
-								<li><a href="invoices-list.html">Invoice List</a></li>
-								<li><a href="invoices-detail.html">Invoice Detail</a></li>
-							</ul>
-						</li>
-						<li>
-							<a href="javascript: void(0);" class="has-arrow waves-effect"> <i class="uil-book-alt"></i> <span>Contacts</span> </a>
-							<ul class="sub-menu" aria-expanded="false">
-								<li><a href="contacts-grid.html">User Grid</a></li>
-								<li><a href="contacts-list.html">User List</a></li>
-								<li><a href="contacts-profile.html">Profile</a></li>
-							</ul>
-						</li>
+						
 						
 					
 					</ul>
@@ -623,11 +625,11 @@
 					<div class="row">
 						<div class="col-12">
 							<div class="page-title-box d-flex align-items-center justify-content-between">
-								<h4 class="mb-0">Promo</h4>
+								<h4 class="mb-0">Promo Food</h4>
 								<div class="page-title-right">
 									<ol class="breadcrumb m-0">
 										<li class="breadcrumb-item"><a href="javascript: void(0);">Ecommerce</a></li>
-										<li class="breadcrumb-item active">Promo</li>
+										<li class="breadcrumb-item active">Promo Food</li>
 									</ol>
 								</div>
 							</div>
@@ -657,7 +659,7 @@
 									</a>
 									<div id="addproduct-billinginfo-collapse" class="collapse show" data-bs-parent="#addproduct-accordion">
 										<div class="p-4 border-top">
-											<button type="button" class="btn btn-success waves-effect waves-light mb-3" data-toggle="modal" data-target="#cartTwo" onclick="addPromoFoodBtn()"><i class="mdi mdi-plus me-1"></i> Add Food Item</button>
+											<button type="button" class="btn btn-success waves-effect waves-light mb-3" data-toggle="modal" data-target="#cart" onclick="addPromoFoodBtn()"><i class="mdi mdi-plus me-1"></i> Add Food Item</button>
 										<div class="container mt-3">
 
 									 
@@ -665,7 +667,7 @@
                                            
                                             <thead>
 					                            <tr>
-													<th scope="col">ID</th>
+													<th scope="col">#PF_ID</th>
 													<th scope="col">Promo Name</th>
 													<th scope="col">Food Item Name</th>
 													<th scope="col">Food Quantity</th>
@@ -687,8 +689,11 @@
 										</div>
 									</div>
 									
-							<!-- Modal -->
-							<div class="modal fade" id="cartTwo" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+							
+                                     
+                                     
+                                     <!-- Modal -->
+							<div class="modal fade" id="cart" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
 							  <div class="modal-dialog modal-lg" role="document">
 							    <div class="modal-content">
 							      <div class="modal-header">
@@ -699,17 +704,16 @@
 							      </div>
 							      <div class="modal-body">
 								  
-	  									<form class="needs-validation" id="foodItemForm" name="foodItemForm" novalidate>
-										
-										<div class="row">
+	  										<form id="foodItemForm" name="foodItemForm" class="needs-validation" novalidate>
+												<div class="row">
 													
-										  <div class="col">
-										  
-										  <div class="row" id="promoFoodIdField">
+														<div class="col">
+															
+														<div class="row" id="promoFoodIdField">
 															<div class="col"></div>
 															<div class="col">
 															<div class="mb-3">
-																	<label for="id">ID</label>
+																	<label for="id">#PF_ID</label>
 																	<input type="text" readonly="readonly" class="form-control" id="promoFoodId" name="promoFoodId">
 																</div>
 															</div>
@@ -771,10 +775,8 @@
 										    </div>
 										
 											   <div class="row">
-													<div class="col-lg-4">
-														<div class="mb-3"></div>
-													</div>
-													<div class="col-md-4">
+													<div class="col"></div>
+													<div class="col">
 														<div class="mb-3">
 														<label class="form-label" for="validationCustom03">Quantity</label>
 															<div class="input-group plus-minus-input">
@@ -783,7 +785,7 @@
 																  <i class="fa fa-minus" aria-hidden="true"></i>
 																</button>
 															  </div>
-															  <input type="number" class="form-control" name="quantity" id="quantity" required>
+															  <input type="number" class="form-control" name="quantity" id="quantity" readonly="readonly" required>
 															  <div class="input-group-button">
 																<button type="button" class="form-control" id="validationCustom03" onclick="calculateFoodQuantity('plus')">
 																  <i class="fa fa-plus" aria-hidden="true"></i>
@@ -795,37 +797,35 @@
 															</div>
 														</div>
 													</div>
-													<div class="col-lg-4">
-														<div class="mb-3"></div>
-													</div>
+													<div class="col"></div>
+														
 											   </div>
 														
-											   <div class="row">
+														<div class="row">
 														    <div class="col"></div>
 															<div class="col"></div>
 															<div class="col">
 															<div class="col text-end">
 																	<button class="btn btn-success" type="submit" id="savePromoFoodBtn" onclick="savePromoFood()">Save</button>
 																	<button class="btn btn-success" type="submit" id="updatePromoFoodBtn" onclick="updatePromoFood()">Update</button>
-																	<button class="btn btn-danger" type="reset" onclick="resetQuantity()">Cancel</button>
+																	<button class="btn btn-danger" type="reset" >Cancel</button>
 															   </div>
 															</div>
-												</div>
+														</div>
 														
 													</div>
-												    </div> 
-                                                 </form>
+												    </div>
+												    </form>
 													</div>
 
 												
 												</div>
-											
+										
        
-                                          </div>
-											<div class="modal-footer">
-												
-											</div>
-                                     </div>
+                                       </div>
+											
+                                    </div>
+                                     
 									
 								</div>
 						
@@ -839,7 +839,7 @@
 													</div>
 												</div>
 												<div class="flex-grow-1 overflow-hidden">
-													<h5 class="font-size-16 mb-1">Promo Info</h5>
+													<h5 class="font-size-16 mb-1">Promo Food Info</h5>
 
 												</div>
 												<div class="flex-shrink-0"> <i class="mdi mdi-chevron-up accor-down-icon font-size-24"></i> </div>
@@ -968,6 +968,12 @@
 	<!-- plugins -->
 	<script type="text/javascript" src="<spring:url value="/resources/libs/select2/js/select2.min.js"/>"></script>
 	<script type="text/javascript" src="<spring:url value="/resources/js/pages/form-advanced.init.js"/>"></script>
+	
+	<!-- Sweet Alerts js -->
+     <script type="text/javascript" src="<spring:url value="/resources/libs/sweetalert2/sweetalert2.min.js"/>"></script>
+
+     <!-- Sweet alert init js-->
+     <script type="text/javascript" src="<spring:url value="/resources/js/pages/sweet-alerts.init.js"/>"></script>
      
 	<!-- App js -->
 	<script type="text/javascript" src="<spring:url value="/resources/js/app.js"/>"></script>

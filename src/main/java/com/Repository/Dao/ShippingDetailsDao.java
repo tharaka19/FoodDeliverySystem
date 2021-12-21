@@ -9,5 +9,6 @@ public interface ShippingDetailsDao {
 	public void save(ShippingDetails shippingDetails);
 	public ShippingDetails getById(int id);
 	public List<ShippingDetails> getAllById(int id);
+	public List<ShippingDetails> getOneByStatusAndCustomerId(String status, int id);
 	public void update(ShippingDetails ShippingDetails);
 }

@@ -35,7 +35,6 @@ public class PromoService implements PromoBd{
 
 	/**
 	 * get all promo details
-	 * @return promo list
 	 */
 	@Override
 	public List<Promo> getAll() {
@@ -44,8 +43,6 @@ public class PromoService implements PromoBd{
 
 	/**
 	 * get promo details by promo id
-	 * @param id
-	 * @return promo
 	 */
 	@Override
 	public Promo getById(int id) {
@@ -53,10 +50,7 @@ public class PromoService implements PromoBd{
 	}
 	
 	/**
-	 * /**
 	 * get active promo details by promo status
-	 * @param status
-	 * @return promo list
 	 */
 	@Override
 	public List<Promo> getAllByStatus(String status) {
@@ -65,8 +59,6 @@ public class PromoService implements PromoBd{
 	
 	/**
 	 * get promo quantity by promo id
-	 * @param id
-	 * @return promo quantity
 	 */
 	@Override
 	public int getQuantityById(int id) {
@@ -98,6 +90,22 @@ public class PromoService implements PromoBd{
 		
 		promoRepository.update(promo);
 	}
+	
+	/**
+	 * update promo quantity by promo id
+	 */
+	@Override
+	public void updateQuantityById(int quantity, int id) {
+		promo = new Promo();
+		
+		//get promo details by promo id
+		promo = promoRepository.getById(id);
+		
+		//set promo quantity
+		promo.setQuantity(quantity);
+		
+		promoRepository.update(promo);		
+	}
 
 	/**
 	 * delete promo details by promo id
@@ -106,10 +114,5 @@ public class PromoService implements PromoBd{
 	public void delete(int id) {
 		promoRepository.delete(promoRepository.getById(id));
 	}
-
-	
-
-	
-
 	
 }

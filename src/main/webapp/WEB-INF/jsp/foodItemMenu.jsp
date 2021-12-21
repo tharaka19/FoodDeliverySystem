@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-    pageEncoding="ISO-8859-1"%>
+    pageEncoding="ISO-8859-1" import= "com.Entity.ShoppingCart" import= "com.Entity.Customer" import="java.util.List"%>
 <%@taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>        
 <!DOCTYPE html>
@@ -14,6 +14,8 @@
     
     <!-- App favicon -->
 	<link rel="shortcut icon" href="<spring:url value="/resources/images/favicon.ico"/>">
+	<!-- Sweet Alert-->
+	<link rel="stylesheet" id="bootstrap-style" href="<spring:url value="/resources/libs/sweetalert2/sweetalert2.min.css"/> ">
     <!-- Bootstrap Css -->
 	<link rel="stylesheet" id="bootstrap-style" href="<spring:url value="/resources/css/bootstrap.min.css"/> ">
 	<!-- Icons Css -->
@@ -21,9 +23,15 @@
 	<!-- App Css-->
 	<link rel="stylesheet" id="app-style" href="<spring:url value="/resources/css/app.min.css"/> ">
     
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <link rel="stylesheet" href="<spring:url value="resources/admin/css/nicepage.css"/> ">
     <link rel="stylesheet" href="<spring:url value="resources/admin/css/Menu.css"/> ">
     <link rel="stylesheet" href="<spring:url value="resources/admin/css/test.css"/>">
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
     
     
     <script class="u-script" type="text/javascript" src="resources/admin/js/jquery.js" ></script>
@@ -58,14 +66,52 @@
     <meta property="og:description" content="">
     <meta property="og:type" content="website">
     
-<script>
 
+
+
+	<% 
+	float foodItemSubTotal = 0;
+	int foodItemCount = 0;
+		if(session.getAttribute("foodItemCart") == null) {
+	
+		}else{
+			 List<ShoppingCart> foodItemCartList = (List<ShoppingCart>) session.getAttribute("foodItemCart");
+	
+	     for(int a = 0; a < foodItemCartList.size(); a++){
+	    	 foodItemSubTotal = foodItemSubTotal + foodItemCartList.get(a).getFoodItemTotal();
+	    	 foodItemCount = foodItemCount + 1;
+	     }
+		}
+	%>
+	
+	<% 
+	float promoSubTotal = 0;
+		float totalDiscount = 0;
+		int promoCount = 0;
+		if(session.getAttribute("promoCart") == null) {
+	
+		}else{
+			 List<ShoppingCart> promoCartList = (List<ShoppingCart>) session.getAttribute("promoCart");
+	
+	     for(int a = 0; a < promoCartList.size(); a++){
+	    	 promoSubTotal = promoSubTotal + promoCartList.get(a).getPromoTotal();
+	    	 totalDiscount = totalDiscount + promoCartList.get(a).getPromoTotalDiscount();
+	    	 promoCount = promoCount +1;
+	     }
+		}
+	%>
+	
+<script>
     $(document).ready(function() {
     	
     	getActiveCategory()
 		
 	});
 
+    function massage(){
+	toastr.info('button');
+    }
+    
 	function getActiveCategory() {
 
 		$('#categoryRow').show();
@@ -119,16 +165,30 @@
 				 data = response
 				 
 					for (i = 0; i < data.length; i++) {
-						
+
+						if(data[i].quantity == 0){
+
 							$("#foodItemRow").append(
 									  '<div class="col">'
 									+ '<div class="card" style="width: 20rem;">'
 									+ '<img src="<spring:url value="/resources/siteImage/' + data[i].image + '"/>" alt="Card image cap">'
 									+ '<div class="card-block">'
 									+ '<h4 class="card-title">'+ data[i].name +'</h4>'
-									+ '<input type="button" class="add-to-cart btn btn-primary" onclick="foodItemCartBTN('+ data[i].id +')" value="Add to cart"></input>'
+									+ '<input type="button" class="btn btn-warning btn-rounded waves-effect waves-light" value="Out of stoke"></input>'
+									+ '</div> </div>');
+						}else{
+
+							$("#foodItemRow").append(
+									  '<div class="col">'
+									+ '<div class="card" style="width: 20rem;">'
+									+ '<img src="<spring:url value="/resources/siteImage/' + data[i].image + '"/>" alt="Card image cap">'
+									+ '<div class="card-block">'
+									+ '<h4 class="card-title">'+ data[i].name +'</h4>'
+									+ '<input type="button" class="btn btn-info btn-rounded waves-effect waves-light" onclick="foodItemCartBTN('+ data[i].id +')" value="Add to cart"></input>'
 									+ '</div> </div>');
 						
+						}
+							
 						}
 
 				},
@@ -140,7 +200,8 @@
 
 	function foodItemCartBTN(id) {
 
-		alert("function is called" + id);
+		alert("Food item successfully added to cart!");
+		
 		$('#categoryRow').hide();
 		$('#foodItemRow').show();
 		
@@ -151,12 +212,16 @@
 			
 		});
 		document.location.reload(true);
+		document.location.reload(true);
 	}
 	
 	
 </script>
   </head>
   <body class="u-body u-overlap"><header class=" u-clearfix u-header u-section-row-container" id="sec-8947"><div class="u-section-rows" style="margin-bottom: 0px;">
+        
+       
+        
         <div class="u-section-row u-sticky u-sticky-e2a9 u-section-row-1" id="sec-71fa">
           
           
@@ -170,7 +235,7 @@
 </g>
 </g><g><g><path d="M490.253,85.249l-81.351,81.35l-21.223-21.222l81.351-81.351l-21.222-21.222l-81.35,81.35l-21.222-21.222l81.351-81.35    L405.366,0.361L299.256,106.471c-12.981,12.981-20.732,30.217-21.828,48.535c-0.277,4.641-1.329,9.206-3.074,13.548l68.929,68.929    c4.342-1.747,8.908-2.798,13.548-3.075c18.318-1.093,35.554-8.846,48.535-21.827l106.11-106.109L490.253,85.249z"></path>
 </g>
-</g></svg></span><span class="u-icon u-icon-circle u-text-custom-color-2 u-icon-2" data-href="My-Account.html" data-page-id="97836832"><svg class="u-svg-link" preserveAspectRatio="xMidYMin slice" viewBox="0 0 55 55" style=""><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-3a3b"></use></svg><svg class="u-svg-content" viewBox="0 0 55 55" x="0px" y="0px" id="svg-3a3b" style="enable-background:new 0 0 55 55;"><path d="M55,27.5C55,12.337,42.663,0,27.5,0S0,12.337,0,27.5c0,8.009,3.444,15.228,8.926,20.258l-0.026,0.023l0.892,0.752
+</g></svg></span><span class="u-icon u-icon-circle u-text-custom-color-2 u-icon-2" data-href="./MyAccount" data-page-id="97836832"><svg class="u-svg-link" preserveAspectRatio="xMidYMin slice" viewBox="0 0 55 55" style=""><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-3a3b"></use></svg><svg class="u-svg-content" viewBox="0 0 55 55" x="0px" y="0px" id="svg-3a3b" style="enable-background:new 0 0 55 55;"><path d="M55,27.5C55,12.337,42.663,0,27.5,0S0,12.337,0,27.5c0,8.009,3.444,15.228,8.926,20.258l-0.026,0.023l0.892,0.752
 	c0.058,0.049,0.121,0.089,0.179,0.137c0.474,0.393,0.965,0.766,1.465,1.127c0.162,0.117,0.324,0.234,0.489,0.348
 	c0.534,0.368,1.082,0.717,1.642,1.048c0.122,0.072,0.245,0.142,0.368,0.212c0.613,0.349,1.239,0.678,1.88,0.98
 	c0.047,0.022,0.095,0.042,0.142,0.064c2.089,0.971,4.319,1.684,6.651,2.105c0.061,0.011,0.122,0.022,0.184,0.033
@@ -239,7 +304,7 @@
             <a class="u-shopping-cart u-shopping-cart-1" href="./ShoppingCart"><span class="u-icon u-shopping-cart-icon"><svg class="u-svg-link" preserveAspectRatio="xMidYMin slice" viewBox="0 0 16 16" style=""><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-58a1"></use></svg><svg class="u-svg-content" viewBox="0 0 16 16" x="0px" y="0px" id="svg-58a1"><path d="M14.5,3l-2.1,5H6.1L5.9,7.6L4,3H14.5 M0,0v1h2.1L5,8l-2,4h11v-1H4.6l1-2H13l3-7H3.6L2.8,0H0z M12.5,13
 	c-0.8,0-1.5,0.7-1.5,1.5s0.7,1.5,1.5,1.5s1.5-0.7,1.5-1.5S13.3,13,12.5,13L12.5,13z M4.5,13C3.7,13,3,13.7,3,14.5S3.7,16,4.5,16
 	S6,15.3,6,14.5S5.3,13,4.5,13L4.5,13z"></path></svg>
-        <span class="u-icon-circle u-palette-1-base u-shopping-cart-count" style="font-size: 0.75rem;"><!--shopping_cart_count-->2<!--/shopping_cart_count--></span>
+        <span class="u-icon-circle u-palette-1-base u-shopping-cart-count" style="font-size: 0.75rem;"><!--shopping_cart_count--><%out.print(foodItemCount + promoCount);%><!--/shopping_cart_count--></span>
     </span>
             </a><!--/shopping_cart-->
           </div>
@@ -378,6 +443,12 @@ c0-7.4,3.4-18.8,18.8-18.8h13.8v15.4H75.5z"></path></svg></span>
 	<script type="text/javascript" src="<spring:url value="/resources/libs/node-waves/waves.min.js"/>"></script>
 	<script type="text/javascript" src="<spring:url value="/resources/libs/waypoints/lib/jquery.waypoints.min.js"/>"></script>
 	<script type="text/javascript" src="<spring:url value="/resources/libs/jquery.counterup/jquery.counterup.min.js"/>"></script>
+	
+	<!-- Sweet Alerts js -->
+     <script type="text/javascript" src="<spring:url value="/resources/libs/sweetalert2/sweetalert2.min.js"/>"></script>
+
+     <!-- Sweet alert init js-->
+     <script type="text/javascript" src="<spring:url value="/resources/js/pages/sweet-alerts.init.js"/>"></script>
 	
 	<!-- App js -->
 	<script type="text/javascript" src="<spring:url value="/resources/js/app.js"/>"></script>
